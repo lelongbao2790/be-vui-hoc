@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { getVietnameseVowelRules } from '../../utils/dataLoader.ts';
-import { playCorrectSound } from '../../utils/sounds.ts';
-import { logger } from '../../utils/logger.ts';
-import type { Difficulty, VietnameseVowelRule } from '../../types.ts';
-import FeedbackIndicator from '../FeedbackIndicator.tsx';
+import { getVietnameseVowelRules } from '../../utils/dataLoader';
+import { playCorrectSound } from '../../utils/sounds';
+import { logger } from '../../utils/logger';
+import type { Difficulty, VietnameseVowelRule } from '../../types';
+import FeedbackIndicator from '../FeedbackIndicator';
 
 interface TypingVietnameseVowelsLevelProps {
   difficulty: Difficulty;

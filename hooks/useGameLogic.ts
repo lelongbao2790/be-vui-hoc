@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { playVictorySound } from '../utils/sounds.ts';
-import { logger } from '../utils/logger.ts';
+import { playVictorySound } from '../utils/sounds';
+import { logger } from '../utils/logger';
 
 interface GameLogicParams {
   timeLimit: number;

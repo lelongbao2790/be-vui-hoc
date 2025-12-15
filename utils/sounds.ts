@@ -1,11 +1,4 @@
-import { logger } from "./logger.ts";
-
-// --- FPT.AI Text-to-Speech Integration ---
-// TODO: Dán API Key của bạn từ FPT.AI vào đây để có giọng nói tiếng Việt chất lượng cao.
-// Bạn có thể đăng ký miễn phí tại: https://fpt.ai/
-const FPT_API_KEY = ''; 
-const FPT_TTS_ENDPOINT = 'https://api.fpt.ai/hmi/tts/v5';
-const fptAudioCache = new Map<string, string>();
+import { logger } from "./logger";
 
 let audioContext: AudioContext | null = null;
 
@@ -55,7 +48,7 @@ export const playIncorrectSound = () => {
   playSound('square', 200, 0.3);
 };
 
-// --- Speech Synthesis Logic ---
+// --- Speech Synthesis Logic using the browser's Web Speech API ---
 
 let voices: SpeechSynthesisVoice[] = [];
 
@@ -68,6 +61,7 @@ const loadVoices = () => {
     }
 };
 
+// Load voices initially and on change
 if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     loadVoices();
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
@@ -76,9 +70,12 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
 }
 
 /**
- * Speaks text using the browser's built-in Web Speech API (Fallback).
+ * Speaks text using the browser's built-in Web Speech API.
+ * This works offline and is more reliable than external APIs.
+ * @param text The text to speak.
+ * @param lang The language ('vi' for Vietnamese, 'en' for English).
  */
-const speakWithBrowserAPI = (text: string, lang: 'vi' | 'en') => {
+export const speakText = (text: string, lang: 'vi' | 'en' = 'en') => {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       logger.warn("Speech Synthesis not supported.");
       return;
@@ -92,88 +89,27 @@ const speakWithBrowserAPI = (text: string, lang: 'vi' | 'en') => {
 
       window.speechSynthesis.cancel(); // Stop any currently playing speech
 
+      // Find a voice that matches the language code (e.g., 'en-US') or the base language (e.g., 'en')
       const desiredVoice = voices.find(voice => voice.lang === langCode) || voices.find(voice => voice.lang.startsWith(lang));
       
       if (desiredVoice) {
           utterance.voice = desiredVoice;
-          logger.log(`Using browser voice: ${desiredVoice.name} (${desiredVoice.lang}) for speech.`);
+          logger.log(`Using voice: ${desiredVoice.name} (${desiredVoice.lang}) for speech.`);
       } else {
-          logger.warn(`No specific browser voice found for language: ${lang}. Using default.`);
+          logger.warn(`No specific voice found for language: ${lang}. Using browser default.`);
       }
       
       window.speechSynthesis.speak(utterance);
+      logger.log(`Requested speech for: "${text}"`);
   } catch (e) {
-      logger.error("Browser speech synthesis failed.", e);
-  }
-};
-
-
-/**
- * Speaks text using the FPT.AI API for high-quality Vietnamese voice.
- */
-const speakWithFPT = async (text: string, voice: string = 'banmai') => {
-    const cacheKey = `${voice}:${text}`;
-    if (fptAudioCache.has(cacheKey)) {
-        const audioUrl = fptAudioCache.get(cacheKey)!;
-        logger.log(`Playing FPT TTS from cache for: "${text}"`);
-        const audio = new Audio(audioUrl);
-        audio.play().catch(e => logger.error("Error playing cached FPT audio:", e));
-        return;
-    }
-
-    logger.log(`Requesting FPT TTS for: "${text}"`);
-    try {
-        const response = await fetch(FPT_TTS_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'api-key': FPT_API_KEY,
-                'voice': voice,
-                'Content-Type': 'text/plain'
-            },
-            body: text
-        });
-
-        if (!response.ok) {
-            const errorBody = await response.text();
-            throw new Error(`FPT API request failed with status ${response.status}: ${errorBody}`);
-        }
-
-        const result = await response.json();
-        
-        if (result.async) {
-            fptAudioCache.set(cacheKey, result.async);
-            const audio = new Audio(result.async);
-            audio.play().catch(e => logger.error("Error playing FPT audio:", e));
-        } else {
-            throw new Error('FPT API response does not contain an audio URL.');
-        }
-
-    } catch (e) {
-        logger.error("FPT TTS failed, falling back to browser API.", e);
-        speakWithBrowserAPI(text, 'vi'); // Fallback on error
-    }
-};
-
-/**
- * Main function to speak text.
- * It intelligently chooses between FPT.AI (if configured for Vietnamese) and the browser's default API.
- * @param text The text to speak.
- * @param lang The language ('vi' for Vietnamese, 'en' for English).
- */
-export const speakText = (text: string, lang: 'vi' | 'en' = 'en') => {
-  if (lang === 'vi' && FPT_API_KEY) {
-      speakWithFPT(text);
-  } else {
-      if (lang === 'vi' && !FPT_API_KEY) {
-          logger.warn("FPT API Key is missing. Falling back to default browser voice for Vietnamese. For better quality, add your key in utils/sounds.ts");
-      }
-      speakWithBrowserAPI(text, lang);
+      logger.error("Speech synthesis failed.", e);
   }
 };
 
 
 // --- Pre-rendered Audio Logic for static phrases ---
 
+// Non-verbal sound effects encoded in Base64
 const SOUND_EFFECTS = {
     victory: [
       "data:audio/mpeg;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YV' IKlgkECBAcHCQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIeIjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1d...",
@@ -198,6 +134,10 @@ const PRELOADED_SOUNDS: Record<string, Record<string, string[]>> = {
 
 let lastPhraseIndex = -1;
 
+/**
+ * Plays a preloaded audio sound from a Base64 string.
+ * @param base64Sound The Base64 data URI of the sound.
+ */
 const playPreloadedSound = (base64Sound: string) => {
     try {
         const audio = new Audio(base64Sound);

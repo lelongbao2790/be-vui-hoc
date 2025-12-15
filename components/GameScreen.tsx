@@ -1,20 +1,21 @@
+
 import React, { useState, useCallback } from 'react';
-import type { Level, Difficulty } from '../types.ts';
-import { LevelType } from '../types.ts';
-import ClickBasicLevel from './levels/ClickBasicLevel.tsx';
-import ClickTargetLevel from './levels/ClickTargetLevel.tsx';
-import MathLevel from './levels/MathLevel.tsx';
-import VietnameseFillWordLevel from './levels/VietnameseFillWordLevel.tsx';
-import VietnameseScrambleLevel from './levels/VietnameseScrambleLevel.tsx';
-import VietnameseRhymeMatchLevel from './levels/VietnameseRhymeMatchLevel.tsx';
-import EnglishFillWordLevel from './levels/EnglishFillWordLevel.tsx';
-import EnglishListenTypeLevel from './levels/EnglishListenTypeLevel.tsx';
-import EnglishImageWordMatchLevel from './levels/EnglishImageWordMatchLevel.tsx';
-import EnglishListenFillSentenceLevel from './levels/EnglishListenFillSentenceLevel.tsx';
-import TypingBasicLevel from './levels/TypingBasicLevel.tsx';
-import TypingVietnameseVowelsLevel from './levels/TypingVietnameseVowelsLevel.tsx';
-import PreschoolGameLevel from './levels/preschool/PreschoolGameLevel.tsx';
-import { HomeIcon } from './icons/HomeIcon.tsx';
+import type { Level, Difficulty } from '../types';
+import { LevelType } from '../types';
+import ClickBasicLevel from './levels/ClickBasicLevel';
+import ClickTargetLevel from './levels/ClickTargetLevel';
+import MathLevel from './levels/MathLevel';
+import VietnameseFillWordLevel from './levels/VietnameseFillWordLevel';
+import VietnameseScrambleLevel from './levels/VietnameseScrambleLevel';
+import VietnameseRhymeMatchLevel from './levels/VietnameseRhymeMatchLevel';
+import EnglishFillWordLevel from './levels/EnglishFillWordLevel';
+import EnglishListenTypeLevel from './levels/EnglishListenTypeLevel';
+import EnglishImageWordMatchLevel from './levels/EnglishImageWordMatchLevel';
+import EnglishListenFillSentenceLevel from './levels/EnglishListenFillSentenceLevel';
+import TypingBasicLevel from './levels/TypingBasicLevel';
+import TypingVietnameseVowelsLevel from './levels/TypingVietnameseVowelsLevel';
+import PreschoolGameLevel from './levels/preschool/PreschoolGameLevel';
+import { HomeIcon } from './icons/HomeIcon';
 
 interface GameScreenProps {
   level: Level;

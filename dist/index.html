@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
   <head>
@@ -11,10 +12,11 @@
     <style>
       body {
         font-family: 'Baloo 2', cursive;
+        /* Ngăn chặn pull-to-refresh trên mobile để trải nghiệm app tốt hơn */
         overscroll-behavior-y: none;
       }
     </style>
-    <!-- Script bắt lỗi toàn cục -->
+    <!-- Script bắt lỗi toàn cục để hiển thị lên màn hình mobile nếu app bị crash -->
     <script>
       window.addEventListener('error', function(e) {
         var errorDiv = document.getElementById('error-display');
@@ -34,19 +36,10 @@
           errorDiv.style.wordBreak = 'break-word';
           document.body.appendChild(errorDiv);
         }
-        // Bỏ qua lỗi Babel transformer thông thường
-        if(e.message && e.message.includes('Babel')) return;
         errorDiv.innerHTML += '<p><strong>Lỗi:</strong> ' + e.message + '</p>';
       });
     </script>
-    
-    <!-- Babel -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
 
-</head>
-  <body class="bg-sky-100 select-none touch-manipulation">
-    <div id="root"></div>
     <script type="importmap">
 {
   "imports": {
@@ -59,6 +52,10 @@
   }
 }
 </script>
-    <script type="text/babel" data-type="module" src="./index.tsx"></script>
-  </body>
+  <script type="module" crossorigin src="/assets/index-_MYQQEnY.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DRPMN9yU.css">
+</head>
+  <body class="bg-sky-100 select-none touch-manipulation">
+    <div id="root"></div>
+</body>
 </html>

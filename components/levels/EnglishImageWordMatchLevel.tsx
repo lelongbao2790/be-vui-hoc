@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getEnglishWords } from '../../utils/dataLoader.ts';
-import type { EnglishWord, Difficulty } from '../../types.ts';
-import { playCorrectSound, playEncouragementSound, speakText } from '../../utils/sounds.ts';
-import FeedbackIndicator from '../FeedbackIndicator.tsx';
-import { useGameLogic } from '../../hooks/useGameLogic.ts';
-import GameEndScreen from '../GameEndScreen.tsx';
-import ReviewMistakesScreen from '../ReviewMistakesScreen.tsx';
+import { getEnglishWords } from '../../utils/dataLoader';
+import type { EnglishWord, Difficulty } from '../../types';
+import { playCorrectSound, playEncouragementSound, speakText } from '../../utils/sounds';
+import FeedbackIndicator from '../FeedbackIndicator';
+import { useGameLogic } from '../../hooks/useGameLogic';
+import GameEndScreen from '../GameEndScreen';
+import ReviewMistakesScreen from '../ReviewMistakesScreen';
 
 interface IncorrectAttempt {
     word: EnglishWord;

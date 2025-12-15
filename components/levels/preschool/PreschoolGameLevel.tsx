@@ -1,18 +1,19 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
-import type { Level, PreschoolItem, PreschoolColor, PreschoolShape } from '../../../types.ts';
-import { LevelType } from '../../../types.ts';
-import { useGameLogic } from '../../../hooks/useGameLogic.ts';
-import { getPreschoolAnimals, getPreschoolObjects, getPreschoolColors, getPreschoolShapes } from '../../../utils/dataLoader.ts';
-import { speakText, playCorrectSound, playEncouragementSound, playVictorySound } from '../../../utils/sounds.ts';
-import FeedbackIndicator from '../../FeedbackIndicator.tsx';
-import GameEndScreen from '../../GameEndScreen.tsx';
-import ReviewMistakesScreen from '../../ReviewMistakesScreen.tsx';
-import { StarIcon } from '../../icons/StarIcon.tsx';
-import { CircleIcon } from '../../icons/CircleIcon.tsx';
-import { SquareIcon } from '../../icons/SquareIcon.tsx';
-import { TriangleIcon } from '../../icons/TriangleIcon.tsx';
-import { HeartIcon } from '../../icons/HeartIcon.tsx';
-import { logger } from '../../../utils/logger.ts';
+import type { Level, PreschoolItem, PreschoolColor, PreschoolShape } from '../../../types';
+import { LevelType } from '../../../types';
+import { useGameLogic } from '../../../hooks/useGameLogic';
+import { getPreschoolAnimals, getPreschoolObjects, getPreschoolColors, getPreschoolShapes } from '../../../utils/dataLoader';
+import { speakText, playCorrectSound, playEncouragementSound, playVictorySound } from '../../../utils/sounds';
+import FeedbackIndicator from '../../FeedbackIndicator';
+import GameEndScreen from '../../GameEndScreen';
+import ReviewMistakesScreen from '../../ReviewMistakesScreen';
+import { StarIcon } from '../../icons/StarIcon';
+import { CircleIcon } from '../../icons/CircleIcon';
+import { SquareIcon } from '../../icons/SquareIcon';
+import { TriangleIcon } from '../../icons/TriangleIcon';
+import { HeartIcon } from '../../icons/HeartIcon';
+import { logger } from '../../../utils/logger';
 
 // --- Props & Types ---
 interface PreschoolGameLevelProps {
@@ -23,17 +24,6 @@ interface PreschoolGameLevelProps {
   onGoToMenu: () => void;
 }
 type FeedbackStatus = 'correct' | 'incorrect' | null;
-
-// Unified type for all game items to avoid 'any' and 'unknown' issues
-interface GameItem {
-  id: string | number;
-  name?: string;
-  image?: string;
-  hex?: string;
-  value?: number;
-  item?: string;
-}
-
 interface Challenge<T> {
   prompt: string;
   correctAnswer: T;
@@ -63,12 +53,12 @@ const shapeComponents: Record<string, React.FC<any>> = {
 
 
 const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrect, onGameEnd, onStatusUpdate, onGoToMenu }) => {
-  const [data, setData] = useState<GameItem[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [challenge, setChallenge] = useState<Challenge<GameItem> | null>(null);
+  const [challenge, setChallenge] = useState<Challenge<any> | null>(null);
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
   
-  const gameLogic = useGameLogic<IncorrectAttempt<GameItem>>({
+  const gameLogic = useGameLogic<IncorrectAttempt<any>>({
     totalQuestions: TOTAL_QUESTIONS,
     timeLimit: 999, // Effectively untimed
     onGameEnd,
@@ -81,7 +71,7 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
 
   // 1. Data Loading Effect
   useEffect(() => {
-    let loader: Promise<any[]>;
+    let loader;
     switch (level.type) {
       case LevelType.PRESCHOOL_ANIMALS:
         loader = getPreschoolAnimals();
@@ -99,8 +89,7 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
         loader = Promise.resolve([]);
     }
     loader.then(loadedData => {
-      // Cast loaded data to GameItem[] as they share compatible structures
-      setData(loadedData as GameItem[]);
+      setData(loadedData);
       setIsLoading(false);
       logger.log(`Data loaded for ${level.type}`, loadedData);
     });
@@ -112,7 +101,7 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
       return;
     }
     logger.log(`Generating new challenge for ${level.type}`);
-    let newChallenge: Challenge<GameItem>;
+    let newChallenge: Challenge<any>;
 
     if (level.type === LevelType.PRESCHOOL_COUNTING) {
         const itemEmoji = COUNTING_EMOJIS[Math.floor(Math.random() * COUNTING_EMOJIS.length)];
@@ -155,7 +144,7 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
   }, [isLoading, gameLogic.currentQuestionIndex, generateChallenge]);
 
   // 4. Handle User Selection
-  const handleSelection = (selectedOption: GameItem) => {
+  const handleSelection = (selectedOption: any) => {
     if (feedback || !challenge) return;
     
     const isCorrect = selectedOption.id === challenge.correctAnswer.id;
@@ -179,7 +168,7 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
   };
   
   // 5. Render Logic
-  const renderOption = (option: GameItem) => {
+  const renderOption = (option: any) => {
     switch (level.type) {
       case LevelType.PRESCHOOL_COLORS:
         return (
@@ -192,14 +181,14 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
           />
         );
       case LevelType.PRESCHOOL_SHAPES:
-        const ShapeComponent = shapeComponents[option.id as string];
+        const ShapeComponent = shapeComponents[option.id];
         return (
             <button
                 key={option.id}
                 onClick={() => handleSelection(option)}
                 className="w-32 h-32 md:w-48 md:h-48 rounded-2xl shadow-lg transform hover:-translate-y-2 transition-transform duration-300 border-8 border-white/80 bg-gradient-to-br from-sky-300 to-blue-400 text-white flex items-center justify-center"
             >
-                {ShapeComponent && <ShapeComponent className="w-24 h-24 md:w-32 md:h-32" />}
+                <ShapeComponent className="w-24 h-24 md:w-32 md:h-32" />
             </button>
         );
       case LevelType.PRESCHOOL_COUNTING:
@@ -232,7 +221,7 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
       if(level.type === LevelType.PRESCHOOL_COUNTING) {
           return (
              <div className="flex flex-wrap justify-center items-center gap-4 p-4 min-h-[150px] max-w-2xl mx-auto">
-                {Array.from({ length: challenge.correctAnswer.value || 0 }).map((_, i) => (
+                {Array.from({ length: challenge.correctAnswer.value }).map((_, i) => (
                     <span key={i} className="text-6xl md:text-7xl">{challenge.correctAnswer.item}</span>
                 ))}
             </div>
@@ -250,11 +239,11 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
         <ReviewMistakesScreen
           incorrectAttempts={incorrectAttempts}
           onBack={() => setIsReviewing(false)}
-          renderAttempt={(attempt: IncorrectAttempt<GameItem>, index) => (
+          renderAttempt={(attempt, index) => (
             <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
               <p className="font-bold text-xl">{attempt.prompt}</p>
-              <p className="text-lg text-red-700">Bé đã chọn: {attempt.selectedAnswer.name || attempt.selectedAnswer.value}</p>
-              <p className="text-lg text-green-700">Đáp án đúng: {attempt.correctAnswer.name || attempt.correctAnswer.value}</p>
+              <p className="text-lg text-red-700">Bé đã chọn: {attempt.selectedAnswer.name}</p>
+              <p className="text-lg text-green-700">Đáp án đúng: {attempt.correctAnswer.name}</p>
             </div>
           )}
         />

@@ -1,19 +1,19 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import LevelSelector from './components/LevelSelector.tsx';
-import GameScreen from './components/GameScreen.tsx';
-import DifficultySelector from './components/DifficultySelector.tsx';
-import SubjectSelector from './components/SubjectSelector.tsx';
-import AgeSelector from './components/AgeSelector.tsx';
-import PreschoolSelector from './components/PreschoolSelector.tsx';
-import type { Level, Difficulty, Subject } from './types.ts';
-import { StarIcon } from './components/icons/StarIcon.tsx';
-import { BackIcon } from './components/icons/BackIcon.tsx';
-import { loadHighScores, saveHighScores } from './utils/storage.ts';
-import { logger } from './utils/logger.ts';
+import LevelSelector from './components/LevelSelector';
+import GameScreen from './components/GameScreen';
+import DifficultySelector from './components/DifficultySelector';
+import SubjectSelector from './components/SubjectSelector';
+import AgeSelector from './components/AgeSelector';
+import PreschoolSelector from './components/PreschoolSelector';
+import type { Level, Difficulty, Subject } from './types';
+import { StarIcon } from './components/icons/StarIcon';
+import { BackIcon } from './components/icons/BackIcon';
+import { loadHighScores, saveHighScores } from './utils/storage';
+import { logger } from './utils/logger';
 
 type GameState = 'selecting_subject' | 'selecting_level' | 'selecting_difficulty' | 'playing';
 type AgeGroup = 'preschool' | 'grade1';
-const APP_VERSION = '1.6.2-fix-html';
+const APP_VERSION = '1.6.1-fix-navigation';
 
 const App: React.FC = () => {
   const [selectedAgeGroup, setSelectedAgeGroup] = useState<AgeGroup | null>(null);
