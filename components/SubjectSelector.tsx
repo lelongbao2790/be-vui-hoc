@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { Subject } from '../types.ts';
-import { ClickIcon } from './icons/ClickIcon.tsx';
-import { MathIcon } from './icons/MathIcon.tsx';
-import { BookIcon } from './icons/BookIcon.tsx';
-import { EnglishIcon } from './icons/EnglishIcon.tsx';
-import { TrophyIcon } from './icons/TrophyIcon.tsx';
-import { TypingIcon } from './icons/TypingIcon.tsx';
+import { Subject } from '../types';
+import { ClickIcon } from './icons/ClickIcon';
+import { MathIcon } from './icons/MathIcon';
+import { BookIcon } from './icons/BookIcon';
+import { EnglishIcon } from './icons/EnglishIcon';
+import { TrophyIcon } from './icons/TrophyIcon';
+import { TypingIcon } from './icons/TypingIcon';
 
 interface SubjectSelectorProps {
   onSelectSubject: (subject: Subject) => void;

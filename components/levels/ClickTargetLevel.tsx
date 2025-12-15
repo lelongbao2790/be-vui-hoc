@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { playCorrectSound, playIncorrectSound, playVictorySound } from '../../utils/sounds.ts';
-import FeedbackIndicator from '../FeedbackIndicator.tsx';
-import { TARGET_EMOJIS } from '../../constants.ts';
-import { Difficulty } from '../../types.ts';
+import { playCorrectSound, playIncorrectSound, playVictorySound } from '../../utils/sounds';
+import FeedbackIndicator from '../FeedbackIndicator';
+import { TARGET_EMOJIS } from '../../constants';
+import { Difficulty } from '../../types';
 
 interface ClickTargetLevelProps {
   difficulty: Difficulty;

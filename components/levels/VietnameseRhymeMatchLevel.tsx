@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { getVietnameseRhymes } from '../../utils/dataLoader.ts';
-import type { VietnameseRhymePair, Difficulty } from '../../types.ts';
-import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds.ts';
-import FeedbackIndicator from '../FeedbackIndicator.tsx';
+import { getVietnameseRhymes } from '../../utils/dataLoader';
+import type { VietnameseRhymePair, Difficulty } from '../../types';
+import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds';
+import FeedbackIndicator from '../FeedbackIndicator';
 
 interface IncorrectAttempt {
     pair: VietnameseRhymePair;

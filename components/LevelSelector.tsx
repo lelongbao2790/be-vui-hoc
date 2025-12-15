@@ -1,20 +1,20 @@
 
 import React from 'react';
-import type { Level, Subject } from '../types.ts';
-import { LevelType } from '../types.ts';
-import { LEVELS } from '../constants.ts';
-import { ClickIcon } from './icons/ClickIcon.tsx';
-import { MathIcon } from './icons/MathIcon.tsx';
-import { BookIcon } from './icons/BookIcon.tsx';
-import { TargetIcon } from './icons/TargetIcon.tsx';
-import { ShuffleIcon } from './icons/ShuffleIcon.tsx';
-import { EnglishIcon } from './icons/EnglishIcon.tsx';
-import { ListenIcon } from './icons/ListenIcon.tsx';
-import { RhymeIcon } from './icons/RhymeIcon.tsx';
-import { ImageWordMatchIcon } from './icons/ImageWordMatchIcon.tsx';
-import { SentenceListenIcon } from './icons/SentenceListenIcon.tsx';
-import { TypingIcon } from './icons/TypingIcon.tsx';
-import { VietnameseVowelIcon } from './icons/VietnameseVowelIcon.tsx';
+import type { Level, Subject } from '../types';
+import { LevelType } from '../types';
+import { LEVELS } from '../constants';
+import { ClickIcon } from './icons/ClickIcon';
+import { MathIcon } from './icons/MathIcon';
+import { BookIcon } from './icons/BookIcon';
+import { TargetIcon } from './icons/TargetIcon';
+import { ShuffleIcon } from './icons/ShuffleIcon';
+import { EnglishIcon } from './icons/EnglishIcon';
+import { ListenIcon } from './icons/ListenIcon';
+import { RhymeIcon } from './icons/RhymeIcon';
+import { ImageWordMatchIcon } from './icons/ImageWordMatchIcon';
+import { SentenceListenIcon } from './icons/SentenceListenIcon';
+import { TypingIcon } from './icons/TypingIcon';
+import { VietnameseVowelIcon } from './icons/VietnameseVowelIcon';
 
 interface LevelSelectorProps {
   subject: Subject;

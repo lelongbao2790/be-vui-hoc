@@ -1,5 +1,5 @@
 
-import type { VietnameseWord, EnglishWord, ScrambleSentence, VietnameseRhymePair, EnglishSentence, VietnameseVowelRule } from '../types.ts';
+import type { VietnameseWord, EnglishWord, ScrambleSentence, VietnameseRhymePair, EnglishSentence, VietnameseVowelRule } from '../types';
 
 // Cơ chế cache đơn giản để tránh fetch lại file nhiều lần
 const cache: Record<string, any> = {};

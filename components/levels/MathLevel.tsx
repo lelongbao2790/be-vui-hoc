@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds.ts';
-import FeedbackIndicator from '../FeedbackIndicator.tsx';
-import { Difficulty } from '../../types.ts';
-import { logger } from '../../utils/logger.ts';
+import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds';
+import FeedbackIndicator from '../FeedbackIndicator';
+import { Difficulty } from '../../types';
+import { logger } from '../../utils/logger';
 
 interface Problem {
   a: number;

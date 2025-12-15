@@ -1,5 +1,5 @@
 
-import { logger } from "./logger.ts";
+import { logger } from "./logger";
 
 let audioContext: AudioContext | null = null;
 
