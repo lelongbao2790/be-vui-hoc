@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { playCorrectSound, playIncorrectSound, playVictorySound } from '../../utils/sounds';
+import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds';
 import FeedbackIndicator from '../FeedbackIndicator';
 import { TARGET_EMOJIS } from '../../constants';
 import { Difficulty } from '../../types';
@@ -80,7 +80,7 @@ const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEn
           }
       }, 1000);
     } else {
-      playIncorrectSound();
+      playEncouragementSound('vi');
       setFeedback('incorrect');
       setTimeout(() => setFeedback(null), 1000);
     }

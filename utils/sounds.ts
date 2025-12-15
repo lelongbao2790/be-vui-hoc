@@ -50,7 +50,7 @@ export const playIncorrectSound = () => {
 };
 
 
-// --- New Speech Synthesis Logic using Google Translate's free TTS API ---
+// --- New Speech Synthesis Logic using the browser's Web Speech API ---
 
 const VI_VICTORY_PHRASES = ["Bé giỏi lắm!", "Tuyệt vời!", "Xuất sắc!", "Con làm tốt lắm!", "Giỏi quá đi!"];
 const VI_ENCOURAGEMENT_PHRASES = ["Không sao, cố gắng lên nào!", "Thử lại nhé!", "Gần đúng rồi, cố lên!", "Mình làm lại nha!"];
@@ -59,27 +59,52 @@ const EN_VICTORY_PHRASES = ["Great job!", "Awesome!", "Excellent!", "You're a st
 const EN_ENCOURAGEMENT_PHRASES = ["It's okay, try again!", "Let's give it another shot!", "You can do it!", "Keep trying!"];
 
 let lastPhraseIndex = -1;
-let currentAudio: HTMLAudioElement | null = null;
+let voices: SpeechSynthesisVoice[] = [];
+
+const loadVoices = () => {
+    const availableVoices = window.speechSynthesis.getVoices();
+    if (availableVoices.length > 0) {
+        voices = availableVoices;
+        logger.log("Speech synthesis voices loaded.", voices.map(v => v.name));
+    }
+};
+
+if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    loadVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+}
 
 /**
- * Speaks a given text using Google Translate's TTS API.
+ * Speaks a given text using the Web Speech API.
  * @param text The text to speak.
  * @param lang The language ('vi' for Vietnamese, 'en' for English).
  */
 export const speakText = (text: string, lang: 'vi' | 'en') => {
-    logger.log(`Requesting speech for text: "${text}" in lang: ${lang}`);
-    // Stop any currently playing audio to prevent overlap
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+        logger.warn("Speech Synthesis not supported.");
+        return;
     }
 
-    const langCode = lang === 'vi' ? 'vi' : 'en-US';
-    const encodedText = encodeURIComponent(text);
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${langCode}&client=tw-ob&q=${encodedText}`;
+    logger.log(`Requesting speech for: "${text}" in lang: ${lang}`);
+    
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    const langCode = lang === 'vi' ? 'vi-VN' : 'en-US';
+    utterance.lang = langCode;
 
-    currentAudio = new Audio(url);
-    currentAudio.play().catch(e => logger.error("Error playing audio:", e));
+    const desiredVoice = voices.find(voice => voice.lang === langCode) || voices.find(voice => voice.lang.startsWith(lang));
+    
+    if (desiredVoice) {
+        utterance.voice = desiredVoice;
+        logger.log(`Using voice: ${desiredVoice.name} (${desiredVoice.lang})`);
+    } else {
+        logger.warn(`No specific voice found for language: ${lang}. Using browser default.`);
+    }
+
+    window.speechSynthesis.speak(utterance);
 };
 
 const playRandomPhrase = (phrases: string[], lang: 'vi' | 'en') => {

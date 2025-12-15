@@ -84,7 +84,7 @@ const ClickBasicLevel: React.FC<ClickBasicLevelProps> = ({ difficulty, onCorrect
 
   if (gameState === 'finished') {
     return (
-        <div className="flex flex-col items-center gap-4 text-center">
+        <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-4 text-center">
             <h3 className="text-5xl font-bold text-rose-500">Hết giờ!</h3>
             <p className="text-3xl">Điểm của bạn là: <span className="font-bold text-blue-600">{score}</span></p>
             <button
@@ -98,7 +98,7 @@ const ClickBasicLevel: React.FC<ClickBasicLevelProps> = ({ difficulty, onCorrect
   }
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full min-h-[400px] relative">
         <button
             key={key}
             onClick={handleClick}
