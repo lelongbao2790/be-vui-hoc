@@ -1,41 +1,48 @@
-
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds';
+import React, { useState, useEffect, useCallback } from 'react';
+import { playCorrectSound, playEncouragementSound } from '../../utils/sounds';
 import FeedbackIndicator from '../FeedbackIndicator';
 import { TARGET_EMOJIS } from '../../constants';
-import { Difficulty } from '../../types';
+import { useGameLogic } from '../../hooks/useGameLogic';
+import GameEndScreen from '../GameEndScreen';
+import ReviewMistakesScreen from '../ReviewMistakesScreen';
 
 interface ClickTargetLevelProps {
-  difficulty: Difficulty;
   onCorrect: () => void;
   onGameEnd: () => void;
   onStatusUpdate: (status: { currentQuestion: number; totalQuestions: number; }) => void;
 }
 
-type FeedbackStatus = 'correct' | 'incorrect' | null;
-type GameState = 'playing' | 'finished';
+interface IncorrectAttempt {
+  targets: { emoji: string; number: number }[];
+  correctNumber: number;
+  clickedNumber: number;
+}
 
-const MAX_TARGETS = 5;
+type FeedbackStatus = 'correct' | 'incorrect' | null;
 const TOTAL_QUESTIONS = 5;
 
 const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEnd, onStatusUpdate }) => {
   const [targets, setTargets] = useState<{ emoji: string; number: number }[]>([]);
   const [correctNumber, setCorrectNumber] = useState(0);
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
-  const [gameState, setGameState] = useState<GameState>('playing');
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const gameEndedRef = useRef(false);
+  
+  const gameLogic = useGameLogic<IncorrectAttempt>({
+    totalQuestions: TOTAL_QUESTIONS,
+    timeLimit: 120, // Time limit is generous, game ends after 5 questions
+    onGameEnd,
+    onCorrect,
+    onStatusUpdate,
+    lang: 'vi',
+  });
 
-  useEffect(() => {
-    onStatusUpdate({ currentQuestion: currentQuestionIndex + 1, totalQuestions: TOTAL_QUESTIONS });
-  }, [currentQuestionIndex, onStatusUpdate]);
+  const { gameState, score, incorrectAttempts, isReviewing, handleCorrect, handleIncorrect, resetGame, setIsReviewing } = gameLogic;
 
   const shuffleArray = <T,>(array: T[]): T[] => {
     return [...array].sort(() => Math.random() - 0.5);
   };
 
   const generateNewChallenge = useCallback(() => {
+    const MAX_TARGETS = 5;
     const shuffledAnimals = shuffleArray(TARGET_EMOJIS);
     const uniqueNumbers = new Set<number>();
     while(uniqueNumbers.size < MAX_TARGETS) {
@@ -54,8 +61,7 @@ const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEn
 
   useEffect(() => {
     generateNewChallenge();
-    gameEndedRef.current = false;
-  }, [generateNewChallenge]);
+  }, [generateNewChallenge, gameLogic.currentQuestionIndex]);
 
   const handleClick = (clickedNumber: number) => {
     if (feedback) return;
@@ -63,51 +69,45 @@ const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEn
     if (clickedNumber === correctNumber) {
       playCorrectSound();
       setFeedback('correct');
-      onCorrect();
-      setScore(prev => prev + 1);
       setTimeout(() => {
-          if (currentQuestionIndex < TOTAL_QUESTIONS - 1) {
-              setCurrentQuestionIndex(prev => prev + 1);
-              generateNewChallenge();
-              setFeedback(null);
-          } else {
-              playVictorySound('vi');
-              setGameState('finished');
-              if (!gameEndedRef.current) {
-                onGameEnd();
-                gameEndedRef.current = true;
-              }
-          }
+        handleCorrect();
+        setFeedback(null);
       }, 1000);
     } else {
       playEncouragementSound('vi');
       setFeedback('incorrect');
+      handleIncorrect({ targets, correctNumber, clickedNumber });
       setTimeout(() => setFeedback(null), 1000);
     }
   };
 
-  const resetGame = () => {
-    setGameState('playing');
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    generateNewChallenge();
-    gameEndedRef.current = false;
-  };
-
   if (gameState === 'finished') {
+    if (isReviewing) {
+        return (
+            <ReviewMistakesScreen
+                incorrectAttempts={incorrectAttempts}
+                onBack={() => setIsReviewing(false)}
+                renderAttempt={(attempt, index) => (
+                    <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
+                        <p className="font-bold text-xl">Câu hỏi: Click vào số {attempt.correctNumber}</p>
+                        <p className="text-lg text-red-700">Bé chọn: {attempt.clickedNumber}</p>
+                    </div>
+                )}
+            />
+        );
+    }
     return (
-        <div className="flex flex-col items-center gap-4 text-center">
-            <h3 className="text-5xl font-bold text-rose-500">Hoàn thành!</h3>
+        <GameEndScreen
+            title="Hoàn thành!"
+            onReset={resetGame}
+            onReview={() => setIsReviewing(true)}
+            showReviewButton={incorrectAttempts.length > 0}
+        >
             <p className="text-3xl">Bé đã trả lời đúng: <span className="font-bold text-blue-600">{score} / {TOTAL_QUESTIONS}</span> câu</p>
-            <button
-                onClick={resetGame}
-                className="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 text-2xl rounded-full shadow-lg transition-transform transform hover:scale-105"
-            >
-                Chơi lại
-            </button>
-        </div>
+        </GameEndScreen>
     )
   }
+
 
   return (
     <div className="w-full flex flex-col items-center justify-center relative">

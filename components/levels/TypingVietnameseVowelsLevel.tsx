@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { getVietnameseVowelRules } from '../../utils/dataLoader';
 import { playCorrectSound } from '../../utils/sounds';
@@ -58,13 +57,6 @@ const TypingVietnameseVowelsLevel: React.FC<TypingVietnameseVowelsLevelProps> = 
             }
         }, 500);
     }
-  };
-  
-  const resetGame = () => {
-    logger.log('Resetting Vietnamese Vowels game.');
-    setCurrentIndex(0);
-    setInputValue('');
-    setFeedback(null);
   };
 
   if (isLoading) return <div>Đang tải dữ liệu...</div>;

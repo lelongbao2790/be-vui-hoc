@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { playCorrectSound, playIncorrectSound } from '../../utils/sounds';
 import { logger } from '../../utils/logger';
 import type { Difficulty } from '../../types';
+import GameEndScreen from '../GameEndScreen';
 
 interface TypingBasicLevelProps {
   difficulty: Difficulty;
@@ -31,6 +31,7 @@ const TypingBasicLevel: React.FC<TypingBasicLevelProps> = ({ onCorrect, onStatus
   const [textToType, setTextToType] = useState('');
   const [userInput, setUserInput] = useState('');
   const [gameState, setGameState] = useState<GameState>('playing');
+  const [finalStats, setFinalStats] = useState({ cpm: 0, accuracy: 100 });
   
   const startTimeRef = useRef<number | null>(null);
   const totalTypedRef = useRef(0);
@@ -43,6 +44,7 @@ const TypingBasicLevel: React.FC<TypingBasicLevelProps> = ({ onCorrect, onStatus
     setTextToType(newText);
     setUserInput('');
     setGameState('playing');
+    setFinalStats({ cpm: 0, accuracy: 100 });
     startTimeRef.current = null;
     totalTypedRef.current = 0;
     errorsRef.current = 0;
@@ -77,7 +79,7 @@ const TypingBasicLevel: React.FC<TypingBasicLevelProps> = ({ onCorrect, onStatus
     }
     
     // Calculate stats
-    const elapsedTime = (Date.now() - startTimeRef.current) / 1000 / 60; // in minutes
+    const elapsedTime = (Date.now() - (startTimeRef.current || Date.now())) / 1000 / 60; // in minutes
     const correctChars = userInput.length + (e.key === currentChar ? 1 : 0);
     const cpm = elapsedTime > 0 ? Math.round(correctChars / elapsedTime) : 0;
     const accuracy = totalTypedRef.current > 0 ? Math.round(((totalTypedRef.current - errorsRef.current) / totalTypedRef.current) * 100) : 100;
@@ -89,8 +91,9 @@ const TypingBasicLevel: React.FC<TypingBasicLevelProps> = ({ onCorrect, onStatus
       if (!gameEndedRef.current) {
         setGameState('finished');
         const elapsedTimeSeconds = (Date.now() - (startTimeRef.current ?? Date.now())) / 1000;
-        const finalCpm = Math.round((userInput.length / elapsedTimeSeconds) * 60);
-        const finalAccuracy = Math.round(((totalTypedRef.current - errorsRef.current) / totalTypedRef.current) * 100);
+        const finalCpm = elapsedTimeSeconds > 0 ? Math.round((userInput.length / elapsedTimeSeconds) * 60) : 0;
+        const finalAccuracy = totalTypedRef.current > 0 ? Math.round(((totalTypedRef.current - errorsRef.current) / totalTypedRef.current) * 100) : 100;
+        setFinalStats({ cpm: finalCpm, accuracy: finalAccuracy });
         onCorrect(finalCpm + finalAccuracy); // Score based on speed and accuracy
         onGameEnd();
         gameEndedRef.current = true;
@@ -100,15 +103,12 @@ const TypingBasicLevel: React.FC<TypingBasicLevelProps> = ({ onCorrect, onStatus
 
   if (gameState === 'finished') {
     return (
-        <div className="flex flex-col items-center gap-4 text-center">
-            <h3 className="text-5xl font-bold text-rose-500">Hoàn thành!</h3>
-            <button
-                onClick={setupGame}
-                className="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 text-2xl rounded-full shadow-lg transition-transform transform hover:scale-105"
-            >
-                Chơi lại
-            </button>
-        </div>
+        <GameEndScreen title="Hoàn thành!" onReset={setupGame}>
+            <div className="text-2xl space-y-2">
+                <p>Tốc độ: <span className="font-bold text-blue-600">{finalStats.cpm} cpm</span></p>
+                <p>Chính xác: <span className="font-bold text-green-600">{finalStats.accuracy}%</span></p>
+            </div>
+        </GameEndScreen>
     )
   }
 

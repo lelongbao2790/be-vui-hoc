@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { playCorrectSound } from '../../utils/sounds';
 import { CLICK_EMOJIS } from '../../constants';
 import { Difficulty } from '../../types';
+import GameEndScreen from '../GameEndScreen';
 
 interface ClickBasicLevelProps {
   difficulty: Difficulty;
@@ -49,15 +49,21 @@ const ClickBasicLevel: React.FC<ClickBasicLevelProps> = ({ difficulty, onCorrect
     }
   }, []);
 
-  useEffect(() => {
+  const setupGame = useCallback(() => {
+    setTimeLeft(TIME_LIMITS[difficulty]);
+    setScore(0);
+    setGameState('playing');
     moveTarget();
     gameEndedRef.current = false;
     timerRef.current = window.setInterval(() => {
       setTimeLeft(prev => prev - 1);
     }, 1000);
-    
+  }, [difficulty, moveTarget]);
+
+  useEffect(() => {
+    setupGame();
     return cleanupTimer;
-  }, [moveTarget, cleanupTimer]);
+  }, [setupGame, cleanupTimer]);
 
   useEffect(() => {
     if (timeLeft <= 0 && !gameEndedRef.current) {
@@ -76,24 +82,11 @@ const ClickBasicLevel: React.FC<ClickBasicLevelProps> = ({ difficulty, onCorrect
     moveTarget();
   };
 
-  const resetGame = () => {
-    setTimeLeft(TIME_LIMITS[difficulty]);
-    setScore(0);
-    setGameState('playing');
-  }
-
   if (gameState === 'finished') {
     return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-4 text-center">
-            <h3 className="text-5xl font-bold text-rose-500">Hết giờ!</h3>
-            <p className="text-3xl">Điểm của bạn là: <span className="font-bold text-blue-600">{score}</span></p>
-            <button
-                onClick={resetGame}
-                className="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 text-2xl rounded-full shadow-lg transition-transform transform hover:scale-105"
-            >
-                Chơi lại
-            </button>
-        </div>
+        <GameEndScreen title="Hết giờ!" onReset={setupGame}>
+             <p className="text-3xl">Điểm của bạn là: <span className="font-bold text-blue-600">{score}</span></p>
+        </GameEndScreen>
     )
   }
 

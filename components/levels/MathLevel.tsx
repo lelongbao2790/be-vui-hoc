@@ -1,9 +1,11 @@
-
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds';
+import React, { useState, useEffect, useCallback } from 'react';
+import { playCorrectSound, playEncouragementSound } from '../../utils/sounds';
 import FeedbackIndicator from '../FeedbackIndicator';
 import { Difficulty } from '../../types';
 import { logger } from '../../utils/logger';
+import { useGameLogic } from '../../hooks/useGameLogic';
+import GameEndScreen from '../GameEndScreen';
+import ReviewMistakesScreen from '../ReviewMistakesScreen';
 
 interface Problem {
   a: number;
@@ -24,12 +26,11 @@ interface MathLevelProps {
 }
 
 type FeedbackStatus = 'correct' | 'incorrect' | null;
-type GameState = 'playing' | 'finished';
 
 const TOTAL_QUESTIONS = 10;
 const TIME_LIMITS: Record<Difficulty, number> = {
     [Difficulty.EASY]: 120,
-    [Difficulty.MEDIUM]: 105,
+    [Difficulty.MEDIUM]: 105, // Not used but keep for consistency
     [Difficulty.HARD]: 90,
 };
 
@@ -38,27 +39,18 @@ const MathLevel: React.FC<MathLevelProps> = ({ difficulty, onCorrect, onStatusUp
   const [options, setOptions] = useState<number[]>([]);
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
   
-  const [gameState, setGameState] = useState<GameState>('playing');
-  const [timeLeft, setTimeLeft] = useState(TIME_LIMITS[difficulty]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [incorrectAttempts, setIncorrectAttempts] = useState<IncorrectAttempt[]>([]);
-  const [isReviewing, setIsReviewing] = useState(false);
-
-  const timerRef = useRef<number | null>(null);
-  const gameEndedRef = useRef(false);
   const isHard = difficulty === Difficulty.HARD;
   
-  useEffect(() => {
-    onStatusUpdate({ timeLeft, currentQuestion: currentQuestionIndex + 1, totalQuestions: TOTAL_QUESTIONS });
-  }, [timeLeft, currentQuestionIndex, onStatusUpdate]);
+  const gameLogic = useGameLogic<IncorrectAttempt>({
+    totalQuestions: TOTAL_QUESTIONS,
+    timeLimit: TIME_LIMITS[difficulty],
+    onGameEnd,
+    onCorrect,
+    onStatusUpdate,
+    lang: 'vi',
+  });
 
-  const cleanupTimer = useCallback(() => {
-    if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-    }
-  }, []);
+  const { gameState, timeLeft, score, incorrectAttempts, isReviewing, handleCorrect, handleIncorrect, resetGame, setIsReviewing } = gameLogic;
 
   const generateProblem = useCallback(() => {
     let a: number, b: number, answer: number;
@@ -102,126 +94,60 @@ const MathLevel: React.FC<MathLevelProps> = ({ difficulty, onCorrect, onStatusUp
     setOptions(allOptions);
 
   }, [isHard]);
-  
-  const handleGameFinish = useCallback(() => {
-    setGameState('finished');
-    cleanupTimer();
-    if (!gameEndedRef.current) {
-      onGameEnd();
-      gameEndedRef.current = true;
-    }
-  }, [cleanupTimer, onGameEnd]);
 
   useEffect(() => {
     generateProblem();
-    gameEndedRef.current = false;
-    timerRef.current = window.setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-    return cleanupTimer;
-  }, [generateProblem, cleanupTimer]);
+  }, [generateProblem, gameLogic.currentQuestionIndex]);
 
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      handleGameFinish();
-    }
-  }, [timeLeft, handleGameFinish]);
 
   const handleAnswerClick = (selectedAnswer: number) => {
-    if (feedback) return;
+    if (feedback || !problem) return;
 
-    if (problem && selectedAnswer === problem.answer) {
+    if (selectedAnswer === problem.answer) {
       logger.log(`Correct answer for math problem. Q: ${problem.a}${problem.op}${problem.b}, A: ${selectedAnswer}`);
       playCorrectSound();
       setFeedback('correct');
-      onCorrect();
-      setScore(prev => prev + 1);
-      
       setTimeout(() => {
-        if (currentQuestionIndex < TOTAL_QUESTIONS - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-            generateProblem();
-            setFeedback(null);
-        } else {
-            playVictorySound('vi');
-            handleGameFinish();
-        }
+        handleCorrect();
+        setFeedback(null);
       }, 1000);
     } else {
       logger.warn(`Incorrect answer for math problem. Q: ${problem?.a}${problem?.op}${problem?.b}, A: ${selectedAnswer}, Correct: ${problem?.answer}`);
       playEncouragementSound('vi');
       setFeedback('incorrect');
-      if (problem) {
-        setIncorrectAttempts(prev => [...prev, { problem, selectedAnswer }]);
-      }
+      handleIncorrect({ problem, selectedAnswer });
       setTimeout(() => {
-        if (currentQuestionIndex < TOTAL_QUESTIONS - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-            generateProblem();
-            setFeedback(null);
-        } else {
-            handleGameFinish();
-        }
+        setFeedback(null);
       }, 1000);
     }
-  };
-
-  const resetGame = () => {
-    logger.log('Resetting Math game.');
-    setTimeLeft(TIME_LIMITS[difficulty]);
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setIncorrectAttempts([]);
-    setIsReviewing(false);
-    setGameState('playing');
-    generateProblem();
-    gameEndedRef.current = false;
-    timerRef.current = window.setInterval(() => setTimeLeft(prev => prev - 1), 1000);
   };
 
   if (gameState === 'finished') {
     if (isReviewing) {
         return (
-            <div className="w-full text-center">
-                <h3 className="text-3xl font-bold text-rose-500 mb-4">Xem Lại Lỗi Sai</h3>
-                <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
-                    {incorrectAttempts.map((attempt, index) => (
-                        <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
-                            <p className="font-bold text-xl">Câu hỏi: {attempt.problem.a} {attempt.problem.op} {attempt.problem.b}</p>
-                            <p className="text-lg text-red-700">Bé chọn: {attempt.selectedAnswer}</p>
-                            <p className="text-lg text-green-700">Đáp án đúng: {attempt.problem.answer}</p>
-                        </div>
-                    ))}
-                </div>
-                <button
-                    onClick={() => setIsReviewing(false)}
-                    className="mt-6 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-6 text-xl rounded-full shadow-lg"
-                >
-                    Quay lại
-                </button>
-            </div>
+             <ReviewMistakesScreen
+                incorrectAttempts={incorrectAttempts}
+                onBack={() => setIsReviewing(false)}
+                renderAttempt={(attempt, index) => (
+                    <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
+                        <p className="font-bold text-xl">Câu hỏi: {attempt.problem.a} {attempt.problem.op} {attempt.problem.b}</p>
+                        <p className="text-lg text-red-700">Bé chọn: {attempt.selectedAnswer}</p>
+                        <p className="text-lg text-green-700">Đáp án đúng: {attempt.problem.answer}</p>
+                    </div>
+                )}
+            />
         )
     }
 
     return (
-        <div className="flex flex-col items-center gap-4 text-center">
-            <h3 className="text-5xl font-bold text-rose-500">{timeLeft > 0 ? "Hoàn thành!" : "Hết giờ!"}</h3>
-            <p className="text-3xl">Bé đã trả lời đúng: <span className="font-bold text-blue-600">{score} / {TOTAL_QUESTIONS}</span> câu</p>
-            <div className="flex gap-4 mt-4">
-                <button
-                    onClick={resetGame}
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 text-2xl rounded-full shadow-lg transition-transform transform hover:scale-105"
-                >
-                    Chơi lại
-                </button>
-                {incorrectAttempts.length > 0 && (
-                    <button
-                        onClick={() => setIsReviewing(true)}
-                        className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 px-8 text-2xl rounded-full shadow-lg transition-transform transform hover:scale-105"
-                    >
-                        Xem Lại Lỗi Sai
-                    </button>
-                )}
-            </div>
-        </div>
+      <GameEndScreen
+        title={timeLeft > 0 ? "Hoàn thành!" : "Hết giờ!"}
+        onReset={resetGame}
+        onReview={() => setIsReviewing(true)}
+        showReviewButton={incorrectAttempts.length > 0}
+      >
+        <p className="text-3xl">Bé đã trả lời đúng: <span className="font-bold text-blue-600">{score} / {TOTAL_QUESTIONS}</span> câu</p>
+      </GameEndScreen>
     )
   }
 

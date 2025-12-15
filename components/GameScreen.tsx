@@ -46,11 +46,13 @@ const GameScreen: React.FC<GameScreenProps> = ({ level, difficulty, onGoHome, on
       case LevelType.CLICK_BASIC:
         return <ClickBasicLevel difficulty={difficulty} onCorrect={() => onCorrectAnswer(1)} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />; // 1 point per click
       case LevelType.CLICK_TARGET:
-        return <ClickTargetLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onGameEnd={onGameEnd} onStatusUpdate={handleStatusUpdate} />;
+        // FIX: Removed unused `difficulty` prop. This level only has one difficulty setting.
+        return <ClickTargetLevel onCorrect={onCorrectAnswer} onGameEnd={onGameEnd} onStatusUpdate={handleStatusUpdate} />;
       case LevelType.MATH_ADD_SUBTRACT:
         return <MathLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
       case LevelType.VIETNAMESE_FILL_WORD:
-        return <VietnameseFillWordLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
+        // FIX: Removed unused `difficulty` prop. This level only has one difficulty setting.
+        return <VietnameseFillWordLevel onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
       case LevelType.VIETNAMESE_SCRAMBLE_WORD:
         return <VietnameseScrambleLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
       case LevelType.VIETNAMESE_RHYME_MATCH:

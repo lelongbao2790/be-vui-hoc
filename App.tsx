@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import LevelSelector from './components/LevelSelector';
 import GameScreen from './components/GameScreen';
@@ -11,7 +10,7 @@ import { loadHighScores, saveHighScores } from './utils/storage';
 import { logger } from './utils/logger';
 
 type GameState = 'selecting_subject' | 'selecting_level' | 'selecting_difficulty' | 'playing';
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>('selecting_subject');

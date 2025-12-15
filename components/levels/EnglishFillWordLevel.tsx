@@ -1,9 +1,11 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { getEnglishWords } from '../../utils/dataLoader';
 import type { EnglishWord, Difficulty } from '../../types';
-import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds';
+import { playCorrectSound, playEncouragementSound } from '../../utils/sounds';
 import FeedbackIndicator from '../FeedbackIndicator';
+import { useGameLogic } from '../../hooks/useGameLogic';
+import GameEndScreen from '../GameEndScreen';
+import ReviewMistakesScreen from '../ReviewMistakesScreen';
 
 interface IncorrectAttempt {
     word: EnglishWord;
@@ -18,7 +20,6 @@ interface EnglishFillWordLevelProps {
 }
 
 type FeedbackStatus = 'correct' | 'incorrect' | null;
-type GameState = 'playing' | 'finished';
 
 const TOTAL_QUESTIONS = 5;
 const TIME_LIMIT = 90;
@@ -31,16 +32,19 @@ const EnglishFillWordLevel: React.FC<EnglishFillWordLevelProps> = ({ difficulty,
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
   const [usedIndices, setUsedIndices] = useState<number[]>([]);
   
-  const [gameState, setGameState] = useState<GameState>('playing');
-  const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [incorrectAttempts, setIncorrectAttempts] = useState<IncorrectAttempt[]>([]);
-  const [isReviewing, setIsReviewing] = useState(false);
-
   const inputRef = useRef<HTMLInputElement>(null);
-  const timerRef = useRef<number | null>(null);
-  const gameEndedRef = useRef(false);
+  
+  const gameLogic = useGameLogic<IncorrectAttempt>({
+    totalQuestions: TOTAL_QUESTIONS,
+    timeLimit: TIME_LIMIT,
+    onGameEnd,
+    onCorrect,
+    onStatusUpdate,
+    lang: 'en',
+  });
+
+  const { gameState, timeLeft, score, incorrectAttempts, isReviewing, handleCorrect, handleIncorrect, resetGame, setIsReviewing } = gameLogic;
+
 
   useEffect(() => {
     getEnglishWords().then(data => {
@@ -49,162 +53,91 @@ const EnglishFillWordLevel: React.FC<EnglishFillWordLevelProps> = ({ difficulty,
     });
   }, []);
 
-  useEffect(() => {
-    onStatusUpdate({ timeLeft, currentQuestion: currentQuestionIndex + 1, totalQuestions: TOTAL_QUESTIONS });
-  }, [timeLeft, currentQuestionIndex, onStatusUpdate]);
-
-  const cleanupTimer = useCallback(() => {
-    if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-    }
-  }, []);
-
   const getNewWord = useCallback(() => {
     const wordList = allWords.filter(w => w.difficulty === difficulty);
     if (wordList.length === 0) return;
     
     let availableIndices = wordList.map((_, i) => i).filter(i => !usedIndices.includes(i));
     if (availableIndices.length === 0 && wordList.length > 0) {
-        const newRandomIndex = Math.floor(Math.random() * wordList.length);
-        setCurrentWord(wordList[newRandomIndex]);
-        setInputValue('');
-        setUsedIndices([newRandomIndex]);
-    } else if (availableIndices.length > 0) {
-        const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-        setCurrentWord(wordList[randomIndex]);
-        setInputValue('');
-        setUsedIndices(prev => [...prev, randomIndex]);
+        setUsedIndices([]); // Reset if all used
+        availableIndices = wordList.map((_, i) => i);
     }
-  }, [usedIndices, allWords, difficulty]);
+    
+    const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+    const newWord = wordList[randomIndex];
 
-  const handleGameFinish = useCallback(() => {
-    setGameState('finished');
-    cleanupTimer();
-    if (!gameEndedRef.current) {
-      onGameEnd();
-      gameEndedRef.current = true;
-    }
-  }, [cleanupTimer, onGameEnd]);
-
-  const setupGame = useCallback(() => {
-    const wordList = allWords.filter(w => w.difficulty === difficulty);
-    if (wordList.length === 0) return;
-        
-    const firstRandomIndex = Math.floor(Math.random() * wordList.length);
-    setCurrentWord(wordList[firstRandomIndex]);
+    setCurrentWord(newWord);
     setInputValue('');
-    setUsedIndices([firstRandomIndex]);
+    setUsedIndices(prev => [...prev.filter(i => i !== randomIndex), randomIndex]);
 
-    if (timerRef.current) cleanupTimer();
-    gameEndedRef.current = false;
-    timerRef.current = window.setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-  }, [allWords, difficulty, cleanupTimer]);
+  }, [usedIndices, allWords, difficulty]);
+  
+  const setupGame = useCallback(() => {
+    resetGame();
+    setUsedIndices([]);
+    getNewWord();
+  }, [resetGame, getNewWord]);
 
   useEffect(() => {
-    if (!isLoading) {
-        setupGame();
+    if (!isLoading && allWords.length > 0) {
+        getNewWord();
     }
-    return cleanupTimer;
-  }, [isLoading, setupGame]);
+  }, [isLoading, allWords, gameLogic.currentQuestionIndex]);
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
   }, [currentWord]);
 
-  useEffect(() => {
-    if (timeLeft <= 0) {
-      handleGameFinish();
-    }
-  }, [timeLeft, handleGameFinish]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (feedback) return;
+    if (feedback || !currentWord) return;
+    
+    const isCorrect = inputValue.trim().toLowerCase() === currentWord.missing.toLowerCase();
 
-    const proceedToNext = () => {
-        if (currentQuestionIndex < TOTAL_QUESTIONS - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-            getNewWord();
-            setFeedback(null);
-        } else {
-            playVictorySound('en');
-            handleGameFinish();
-        }
-    };
+    setFeedback(isCorrect ? 'correct' : 'incorrect');
 
-    if (currentWord && inputValue.trim().toLowerCase() === currentWord.missing.toLowerCase()) {
+    if (isCorrect) {
       playCorrectSound();
-      setFeedback('correct');
-      onCorrect();
-      setScore(prev => prev + 1);
-      setTimeout(proceedToNext, 1000);
+      setTimeout(() => {
+          handleCorrect();
+          setFeedback(null);
+      }, 1000);
     } else {
       playEncouragementSound('en');
-      setFeedback('incorrect');
-      if (currentWord) {
-        setIncorrectAttempts(prev => [...prev, { word: currentWord, incorrectInput: inputValue }]);
-      }
-      setTimeout(proceedToNext, 1000);
+      handleIncorrect({ word: currentWord, incorrectInput: inputValue });
+      setTimeout(() => setFeedback(null), 1000);
     }
   };
   
-  const resetGame = () => {
-    setTimeLeft(TIME_LIMIT);
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setIncorrectAttempts([]);
-    setIsReviewing(false);
-    setGameState('playing');
-    setupGame();
-  };
-
   if (isLoading) return <div>Loading data...</div>;
 
   if (gameState === 'finished') {
     if (isReviewing) {
         return (
-            <div className="w-full text-center">
-                <h3 className="text-3xl font-bold text-rose-500 mb-4">Review Mistakes</h3>
-                <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
-                    {incorrectAttempts.map((attempt, index) => (
-                        <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
-                            <p className="font-bold text-xl">{attempt.word.sentence.replace('__', `[${attempt.word.missing}]`)}</p>
-                            <p className="text-lg text-red-700">You typed: {attempt.incorrectInput || "(empty)"}</p>
-                        </div>
-                    ))}
-                </div>
-                <button
-                    onClick={() => setIsReviewing(false)}
-                    className="mt-6 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-6 text-xl rounded-full shadow-lg"
-                >
-                    Back
-                </button>
-            </div>
+            <ReviewMistakesScreen
+                title="Review Mistakes"
+                incorrectAttempts={incorrectAttempts}
+                onBack={() => setIsReviewing(false)}
+                renderAttempt={(attempt, index) => (
+                     <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
+                        <p className="font-bold text-xl">{attempt.word.sentence.replace('__', `[${attempt.word.missing}]`)}</p>
+                        <p className="text-lg text-red-700">You typed: {attempt.incorrectInput || "(empty)"}</p>
+                    </div>
+                )}
+            />
         )
     }
 
     return (
-        <div className="flex flex-col items-center gap-4 text-center">
-            <h3 className="text-5xl font-bold text-rose-500">{timeLeft > 0 ? "Complete!" : "Time's up!"}</h3>
-            <p className="text-3xl">You answered: <span className="font-bold text-blue-600">{score} / {TOTAL_QUESTIONS}</span></p>
-            <div className="flex gap-4 mt-4">
-                <button
-                    onClick={resetGame}
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 text-2xl rounded-full shadow-lg transition-transform transform hover:scale-105"
-                >
-                    Play Again
-                </button>
-                {incorrectAttempts.length > 0 && (
-                    <button
-                        onClick={() => setIsReviewing(true)}
-                        className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 px-8 text-2xl rounded-full shadow-lg transition-transform transform hover:scale-105"
-                    >
-                        Review Mistakes
-                    </button>
-                )}
-            </div>
-        </div>
+        <GameEndScreen
+            title={timeLeft > 0 ? "Complete!" : "Time's up!"}
+            onReset={setupGame}
+            onReview={() => setIsReviewing(true)}
+            showReviewButton={incorrectAttempts.length > 0}
+        >
+             <p className="text-3xl">You answered: <span className="font-bold text-blue-600">{score} / {TOTAL_QUESTIONS}</span></p>
+        </GameEndScreen>
     )
   }
 
