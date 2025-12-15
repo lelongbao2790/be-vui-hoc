@@ -2,50 +2,50 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 
 // ==========================================
-// 1. TYPES & CONSTANTS
+// 1. CONSTANTS (Converted from Enums)
 // ==========================================
 
-enum Subject {
-  CLICKING = 'CLICKING',
-  MATH = 'MATH',
-  VIETNAMESE = 'VIETNAMESE',
-  ENGLISH = 'ENGLISH',
-  TYPING = 'TYPING',
-}
+const Subject = {
+  CLICKING: 'CLICKING',
+  MATH: 'MATH',
+  VIETNAMESE: 'VIETNAMESE',
+  ENGLISH: 'ENGLISH',
+  TYPING: 'TYPING',
+};
 
-enum PreschoolSubject {
-  COLORS = 'PRESCHOOL_COLORS',
-  ANIMALS = 'PRESCHOOL_ANIMALS',
-  OBJECTS = 'PRESCHOOL_OBJECTS',
-  SHAPES = 'PRESCHOOL_SHAPES',
-  COUNTING = 'PRESCHOOL_COUNTING',
-}
+const PreschoolSubject = {
+  COLORS: 'PRESCHOOL_COLORS',
+  ANIMALS: 'PRESCHOOL_ANIMALS',
+  OBJECTS: 'PRESCHOOL_OBJECTS',
+  SHAPES: 'PRESCHOOL_SHAPES',
+  COUNTING: 'PRESCHOOL_COUNTING',
+};
 
-enum LevelType {
-  CLICK_BASIC = 'CLICK_BASIC',
-  CLICK_TARGET = 'CLICK_TARGET',
-  MATH_ADD_SUBTRACT = 'MATH_ADD_SUBTRACT',
-  VIETNAMESE_FILL_WORD = 'VIETNAMESE_FILL_WORD',
-  VIETNAMESE_SCRAMBLE_WORD = 'VIETNAMESE_SCRAMBLE_WORD',
-  VIETNAMESE_RHYME_MATCH = 'VIETNAMESE_RHYME_MATCH',
-  ENGLISH_FILL_WORD = 'ENGLISH_FILL_WORD',
-  ENGLISH_LISTEN_TYPE = 'ENGLISH_LISTEN_TYPE',
-  ENGLISH_IMAGE_WORD_MATCH = 'ENGLISH_IMAGE_WORD_MATCH',
-  ENGLISH_LISTEN_FILL_SENTENCE = 'ENGLISH_LISTEN_FILL_SENTENCE',
-  TYPING_BASIC = 'TYPING_BASIC',
-  TYPING_VIETNAMESE_VOWELS = 'TYPING_VIETNAMESE_VOWELS',
-  PRESCHOOL_COLORS = 'PRESCHOOL_COLORS',
-  PRESCHOOL_ANIMALS = 'PRESCHOOL_ANIMALS',
-  PRESCHOOL_OBJECTS = 'PRESCHOOL_OBJECTS',
-  PRESCHOOL_SHAPES = 'PRESCHOOL_SHAPES',
-  PRESCHOOL_COUNTING = 'PRESCHOOL_COUNTING',
-}
+const LevelType = {
+  CLICK_BASIC: 'CLICK_BASIC',
+  CLICK_TARGET: 'CLICK_TARGET',
+  MATH_ADD_SUBTRACT: 'MATH_ADD_SUBTRACT',
+  VIETNAMESE_FILL_WORD: 'VIETNAMESE_FILL_WORD',
+  VIETNAMESE_SCRAMBLE_WORD: 'VIETNAMESE_SCRAMBLE_WORD',
+  VIETNAMESE_RHYME_MATCH: 'VIETNAMESE_RHYME_MATCH',
+  ENGLISH_FILL_WORD: 'ENGLISH_FILL_WORD',
+  ENGLISH_LISTEN_TYPE: 'ENGLISH_LISTEN_TYPE',
+  ENGLISH_IMAGE_WORD_MATCH: 'ENGLISH_IMAGE_WORD_MATCH',
+  ENGLISH_LISTEN_FILL_SENTENCE: 'ENGLISH_LISTEN_FILL_SENTENCE',
+  TYPING_BASIC: 'TYPING_BASIC',
+  TYPING_VIETNAMESE_VOWELS: 'TYPING_VIETNAMESE_VOWELS',
+  PRESCHOOL_COLORS: 'PRESCHOOL_COLORS',
+  PRESCHOOL_ANIMALS: 'PRESCHOOL_ANIMALS',
+  PRESCHOOL_OBJECTS: 'PRESCHOOL_OBJECTS',
+  PRESCHOOL_SHAPES: 'PRESCHOOL_SHAPES',
+  PRESCHOOL_COUNTING: 'PRESCHOOL_COUNTING',
+};
 
-enum Difficulty {
-    EASY = 'EASY',
-    MEDIUM = 'MEDIUM',
-    HARD = 'HARD',
-}
+const Difficulty = {
+    EASY: 'EASY',
+    MEDIUM: 'MEDIUM',
+    HARD: 'HARD',
+};
 
 // ==========================================
 // 2. UTILS (Logger, Storage, Sounds)
@@ -74,15 +74,18 @@ const saveHighScores = (scores: any) => {
 };
 
 // Sounds
-let audioContext: AudioContext | null = null;
+let audioContext: any = null;
 const getAudioContext = () => {
   if (typeof window !== 'undefined' && !audioContext) {
-    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContextClass) {
+        audioContext = new AudioContextClass();
+    }
   }
   return audioContext;
 };
 
-const playSound = (type: any, frequency: number, duration: number) => {
+const playSound = (type: any, frequency: any, duration: any) => {
   const ctx = getAudioContext();
   if (!ctx) return;
   const oscillator = ctx.createOscillator();
@@ -106,7 +109,7 @@ const playIncorrectSound = () => {
   playSound('square', 200, 0.3);
 };
 
-const speakText = (text: string, lang: 'vi' | 'en' = 'en') => {
+const speakText = (text: string, lang = 'en') => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang === 'vi' ? 'vi-VN' : 'en-US';
@@ -115,11 +118,11 @@ const speakText = (text: string, lang: 'vi' | 'en' = 'en') => {
     window.speechSynthesis.speak(utterance);
 };
 
-const playVictorySound = (lang: 'vi' | 'en') => {
+const playVictorySound = (lang: any) => {
     playCorrectSound();
     // Simplified victory logic
 };
-const playEncouragementSound = (lang: 'vi' | 'en') => {
+const playEncouragementSound = (lang: any) => {
     playIncorrectSound();
 };
 
@@ -179,20 +182,20 @@ const PRESCHOOL_LEVELS = [
 // 4. ICONS (Simplified)
 // ==========================================
 const SvgWrapper = (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props} />;
-const StarIcon = (p:any) => <SvgWrapper {...p} fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></SvgWrapper>;
-const BackIcon = (p:any) => <SvgWrapper {...p} strokeWidth="3"><polyline points="15 18 9 12 15 6"/></SvgWrapper>;
-const HomeIcon = (p:any) => <SvgWrapper {...p}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></SvgWrapper>;
-const ClickIcon = (p:any) => <SvgWrapper {...p}><path d="M9 11.3-3.2 21.2a2.4 2.4 0 0 0 3.4 3.4L19.3 15"/><path d="m14.3 16.3 5-5a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0l-5 5"/><path d="m2.1 2.1 6.4 6.4"/><path d="m19 5-5 5"/></SvgWrapper>;
-const MathIcon = (p:any) => <SvgWrapper {...p}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h8"/><path d="M12 8v8"/></SvgWrapper>;
-const BookIcon = (p:any) => <SvgWrapper {...p}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></SvgWrapper>;
-const EnglishIcon = (p:any) => <SvgWrapper {...p}><path d="M12.16 4.8a2.48 2.48 0 0 0-4.32 0L4.72 12h14.56Z"/><path d="M14.5 12 9.25 20"/><path d="m9.5 12 5.25 8"/><path d="M17.1 12.5h-10.2"/></SvgWrapper>;
-const TypingIcon = (p:any) => <SvgWrapper {...p}><rect width="20" height="16" x="2" y="4" rx="2" ry="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/></SvgWrapper>;
-const TrophyIcon = (p:any) => <SvgWrapper {...p}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.87 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.13 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></SvgWrapper>;
-const TeddyBearIcon = (p:any) => <SvgWrapper {...p}><path d="M15.33 13.67a3 3 0 1 0-4.66 0"/><path d="M12 16.5a2.5 2.5 0 0 0-5 0"/><path d="M17 16.5a2.5 2.5 0 0 1 5 0"/><path d="M12 13a2.5 2.5 0 0 0-5 0"/><path d="M17 13a2.5 2.5 0 0 1 5 0"/><path d="M9 13a2.5 2.5 0 0 0 5 0"/><path d="M12 17.5c-5.52 0-10-4.48-10-10A10 10 0 0 1 12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10Z"/></SvgWrapper>;
-const AppleIcon = (p:any) => <SvgWrapper {...p}><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></SvgWrapper>;
-const PaletteIcon = (p:any) => <SvgWrapper {...p}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></SvgWrapper>;
-const PawIcon = (p:any) => <SvgWrapper {...p}><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-7 0V15a5 5 0 0 1 5-5z"/></SvgWrapper>;
-const NumbersIcon = (p:any) => <SvgWrapper {...p}><path d="M4 13a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2z"/><path d="M14 6a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V6z"/><path d="M14 15a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-2z"/><path d="M8 6h-1a2 2 0 0 0-2 2v2"/></SvgWrapper>;
+const StarIcon = (p: any) => <SvgWrapper {...p} fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></SvgWrapper>;
+const BackIcon = (p: any) => <SvgWrapper {...p} strokeWidth="3"><polyline points="15 18 9 12 15 6"/></SvgWrapper>;
+const HomeIcon = (p: any) => <SvgWrapper {...p}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></SvgWrapper>;
+const ClickIcon = (p: any) => <SvgWrapper {...p}><path d="M9 11.3-3.2 21.2a2.4 2.4 0 0 0 3.4 3.4L19.3 15"/><path d="m14.3 16.3 5-5a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0l-5 5"/><path d="m2.1 2.1 6.4 6.4"/><path d="m19 5-5 5"/></SvgWrapper>;
+const MathIcon = (p: any) => <SvgWrapper {...p}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h8"/><path d="M12 8v8"/></SvgWrapper>;
+const BookIcon = (p: any) => <SvgWrapper {...p}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></SvgWrapper>;
+const EnglishIcon = (p: any) => <SvgWrapper {...p}><path d="M12.16 4.8a2.48 2.48 0 0 0-4.32 0L4.72 12h14.56Z"/><path d="M14.5 12 9.25 20"/><path d="m9.5 12 5.25 8"/><path d="M17.1 12.5h-10.2"/></SvgWrapper>;
+const TypingIcon = (p: any) => <SvgWrapper {...p}><rect width="20" height="16" x="2" y="4" rx="2" ry="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/></SvgWrapper>;
+const TrophyIcon = (p: any) => <SvgWrapper {...p}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.87 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.13 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></SvgWrapper>;
+const TeddyBearIcon = (p: any) => <SvgWrapper {...p}><path d="M15.33 13.67a3 3 0 1 0-4.66 0"/><path d="M12 16.5a2.5 2.5 0 0 0-5 0"/><path d="M17 16.5a2.5 2.5 0 0 1 5 0"/><path d="M12 13a2.5 2.5 0 0 0-5 0"/><path d="M17 13a2.5 2.5 0 0 1 5 0"/><path d="M9 13a2.5 2.5 0 0 0 5 0"/><path d="M12 17.5c-5.52 0-10-4.48-10-10A10 10 0 0 1 12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10Z"/></SvgWrapper>;
+const AppleIcon = (p: any) => <SvgWrapper {...p}><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></SvgWrapper>;
+const PaletteIcon = (p: any) => <SvgWrapper {...p}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></SvgWrapper>;
+const PawIcon = (p: any) => <SvgWrapper {...p}><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-7 0V15a5 5 0 0 1 5-5z"/></SvgWrapper>;
+const NumbersIcon = (p: any) => <SvgWrapper {...p}><path d="M4 13a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2z"/><path d="M14 6a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V6z"/><path d="M14 15a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-2z"/><path d="M8 6h-1a2 2 0 0 0-2 2v2"/></SvgWrapper>;
 
 // ==========================================
 // 5. HOOKS & SHARED COMPONENTS
@@ -200,7 +203,7 @@ const NumbersIcon = (p:any) => <SvgWrapper {...p}><path d="M4 13a2 2 0 0 1 2-2h1
 
 const useGameLogic = (params: any) => {
   const { timeLimit, totalQuestions, onGameEnd, onCorrect, onStatusUpdate, lang } = params;
-  const [gameState, setGameState] = useState<'playing' | 'finished'>('playing');
+  const [gameState, setGameState] = useState('playing');
   const [timeLeft, setTimeLeft] = useState(timeLimit);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -208,7 +211,7 @@ const useGameLogic = (params: any) => {
 
   useEffect(() => {
     onStatusUpdate({ timeLeft, currentQuestion: 1, totalQuestions });
-    timerRef.current = window.setInterval(() => setTimeLeft((p:number) => p - 1), 1000);
+    timerRef.current = window.setInterval(() => setTimeLeft((p: number) => p - 1), 1000);
     return () => { if(timerRef.current) clearInterval(timerRef.current); };
   }, []);
 
@@ -298,8 +301,8 @@ const ClickBasicLevel = ({ onCorrect, onStatusUpdate, onGameEnd, onGoToMenu }: a
     onCorrect();
     setScore(s => s + 1);
     setPosition({
-        top: `${Math.random() * 80 + 10}%`,
-        left: `${Math.random() * 80 + 10}%`
+        top: `${Math.floor(Math.random() * 80) + 10}%`,
+        left: `${Math.floor(Math.random() * 80) + 10}%`
     });
   };
 
@@ -333,7 +336,7 @@ const MathLevel = ({ onCorrect, onGameEnd, onGoToMenu, onStatusUpdate }: any) =>
                 {problem.a} + {problem.b} = ?
             </div>
             <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-                {[problem.ans, problem.ans + 1, problem.ans - 1, problem.ans + 2].sort(() => Math.random() - 0.5).map((opt:number, i) => (
+                {[problem.ans, problem.ans + 1, problem.ans - 1, problem.ans + 2].sort(() => Math.random() - 0.5).map((opt, i) => (
                     <button key={i} onClick={() => opt === problem.ans ? handleCorrect() : handleIncorrect()} className="bg-blue-500 hover:bg-blue-600 text-white text-4xl font-bold py-6 rounded-xl shadow-md transition">
                         {opt}
                     </button>
@@ -389,7 +392,7 @@ const TypingLevel = ({ onCorrect, onGameEnd, onGoToMenu, onStatusUpdate }: any) 
     }, [gameState]); // Regen
 
     useEffect(() => {
-        const handler = (e: KeyboardEvent) => {
+        const handler = (e: any) => {
             if(e.key.toLowerCase() === char) {
                 playCorrectSound();
                 handleCorrect();
@@ -417,8 +420,8 @@ const PreschoolLevel = ({ level, onCorrect, onGameEnd, onGoToMenu, onStatusUpdat
     const { gameState, handleCorrect, handleIncorrect } = useGameLogic({ timeLimit: 999, totalQuestions: 5, onGameEnd, onCorrect, onStatusUpdate, lang: 'vi' });
 
     useEffect(() => {
-        let source = PRESCHOOL_ANIMALS;
-        if(level.type === LevelType.PRESCHOOL_COLORS) source = PRESCHOOL_COLORS as any;
+        let source: any[] = PRESCHOOL_ANIMALS;
+        if(level.type === LevelType.PRESCHOOL_COLORS) source = PRESCHOOL_COLORS;
         
         const target = source[Math.floor(Math.random() * source.length)];
         setItem(target);
@@ -526,8 +529,8 @@ const AgeSelector = ({ onSelect }: any) => (
 // ==========================================
 
 const App = () => {
-  const [age, setAge] = useState<string | null>(null);
-  const [subject, setSubject] = useState<string | null>(null);
+  const [age, setAge] = useState<any>(null);
+  const [subject, setSubject] = useState<any>(null);
   const [level, setLevel] = useState<any>(null);
   const [gameStatus, setGameStatus] = useState<any>({});
 
@@ -582,7 +585,7 @@ const App = () => {
 
             {/* Footer */}
             <div className="p-4 text-center text-sky-700/60 text-sm font-medium">
-                Phiên bản v1.6.3-singlefile • Tạo bởi AI cho Bé ❤️
+                Phiên bản v1.6.4-pure-js • Tạo bởi AI cho Bé ❤️
             </div>
         </div>
     </div>
@@ -590,5 +593,5 @@ const App = () => {
 };
 
 // Render
-const root = ReactDOM.createRoot(document.getElementById('root')!);
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(<App />);
