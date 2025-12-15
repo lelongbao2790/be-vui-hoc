@@ -10,7 +10,7 @@ import { loadHighScores, saveHighScores } from './utils/storage';
 import { logger } from './utils/logger';
 
 type GameState = 'selecting_subject' | 'selecting_level' | 'selecting_difficulty' | 'playing';
-const APP_VERSION = '1.4.0';
+const APP_VERSION = '1.4.4-fix-react-version';
 
 const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>('selecting_subject');
