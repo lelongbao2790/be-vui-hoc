@@ -1,0 +1,26 @@
+
+[
+    { "result": "ă", "guide": "a + w", "description": "Gõ 'a' và 'w' để được 'ă'" },
+    { "result": "â", "guide": "a + a", "description": "Gõ 'a' và 'a' để được 'â'" },
+    { "result": "đ", "guide": "d + d", "description": "Gõ 'd' và 'd' để được 'đ'" },
+    { "result": "ê", "guide": "e + e", "description": "Gõ 'e' và 'e' để được 'ê'" },
+    { "result": "ô", "guide": "o + o", "description": "Gõ 'o' và 'o' để được 'ô'" },
+    { "result": "ơ", "guide": "o + w", "description": "Gõ 'o' và 'w' để được 'ơ'" },
+    { "result": "ư", "guide": "u + w", "description": "Gõ 'u' và 'w' để được 'ư'" },
+    { "result": "á", "guide": "a + s", "description": "Thêm 's' để có dấu sắc" },
+    { "result": "é", "guide": "e + s", "description": "Thêm 's' để có dấu sắc" },
+    { "result": "ố", "guide": "ô + s", "description": "Thêm 's' để có dấu sắc" },
+    { "result": "à", "guide": "a + f", "description": "Thêm 'f' để có dấu huyền" },
+    { "result": "è", "guide": "e + f", "description": "Thêm 'f' để có dấu huyền" },
+    { "result": "ồ", "guide": "ô + f", "description": "Thêm 'f' để có dấu huyền" },
+    { "result": "ả", "guide": "a + r", "description": "Thêm 'r' để có dấu hỏi" },
+    { "result": "ẻ", "guide": "e + r", "description": "Thêm 'r' để có dấu hỏi" },
+    { "result": "ổ", "guide": "ô + r", "description": "Thêm 'r' để có dấu hỏi" },
+    { "result": "ã", "guide": "a + x", "description": "Thêm 'x' để có dấu ngã" },
+    { "result": "ẽ", "guide": "e + x", "description": "Thêm 'x' để có dấu ngã" },
+    { "result": "ỗ", "guide": "ô + x", "description": "Thêm 'x' để có dấu ngã" },
+    { "result": "ạ", "guide": "a + j", "description": "Thêm 'j' để có dấu nặng" },
+    { "result": "ẹ", "guide": "e + j", "description": "Thêm 'j' để có dấu nặng" },
+    { "result": "ộ", "guide": "ô + j", "description": "Thêm 'j' để có dấu nặng" },
+    { "result": "xóa dấu", "guide": "... + z", "description": "Thêm 'z' để xóa dấu đã gõ" }
+]
