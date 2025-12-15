@@ -1,19 +1,18 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
-import type { Level, PreschoolItem, PreschoolColor, PreschoolShape } from '../../../types';
-import { LevelType } from '../../../types';
-import { useGameLogic } from '../../../hooks/useGameLogic';
-import { getPreschoolAnimals, getPreschoolObjects, getPreschoolColors, getPreschoolShapes } from '../../../utils/dataLoader';
-import { speakText, playCorrectSound, playEncouragementSound, playVictorySound } from '../../../utils/sounds';
-import FeedbackIndicator from '../../FeedbackIndicator';
-import GameEndScreen from '../../GameEndScreen';
-import ReviewMistakesScreen from '../../ReviewMistakesScreen';
-import { StarIcon } from '../../icons/StarIcon';
-import { CircleIcon } from '../../icons/CircleIcon';
-import { SquareIcon } from '../../icons/SquareIcon';
-import { TriangleIcon } from '../../icons/TriangleIcon';
-import { HeartIcon } from '../../icons/HeartIcon';
-import { logger } from '../../../utils/logger';
+import type { Level, PreschoolItem, PreschoolColor, PreschoolShape } from '../../../types.ts';
+import { LevelType } from '../../../types.ts';
+import { useGameLogic } from '../../../hooks/useGameLogic.ts';
+import { getPreschoolAnimals, getPreschoolObjects, getPreschoolColors, getPreschoolShapes } from '../../../utils/dataLoader.ts';
+import { speakText, playCorrectSound, playEncouragementSound, playVictorySound } from '../../../utils/sounds.ts';
+import FeedbackIndicator from '../../FeedbackIndicator.tsx';
+import GameEndScreen from '../../GameEndScreen.tsx';
+import ReviewMistakesScreen from '../../ReviewMistakesScreen.tsx';
+import { StarIcon } from '../../icons/StarIcon.tsx';
+import { CircleIcon } from '../../icons/CircleIcon.tsx';
+import { SquareIcon } from '../../icons/SquareIcon.tsx';
+import { TriangleIcon } from '../../icons/TriangleIcon.tsx';
+import { HeartIcon } from '../../icons/HeartIcon.tsx';
+import { logger } from '../../../utils/logger.ts';
 
 // --- Props & Types ---
 interface PreschoolGameLevelProps {

@@ -1,11 +1,11 @@
 import React from 'react';
-import type { Level } from '../types';
-import { PRESCHOOL_LEVELS } from '../constants';
-import { PaletteIcon } from './icons/PaletteIcon';
-import { PawIcon } from './icons/PawIcon';
-import { BlocksIcon } from './icons/BlocksIcon';
-import { ShapesIcon } from './icons/ShapesIcon';
-import { NumbersIcon } from './icons/NumbersIcon';
+import type { Level } from '../types.ts';
+import { PRESCHOOL_LEVELS } from '../constants.ts';
+import { PaletteIcon } from './icons/PaletteIcon.tsx';
+import { PawIcon } from './icons/PawIcon.tsx';
+import { BlocksIcon } from './icons/BlocksIcon.tsx';
+import { ShapesIcon } from './icons/ShapesIcon.tsx';
+import { NumbersIcon } from './icons/NumbersIcon.tsx';
 
 interface PreschoolSelectorProps {
   onSelectLevel: (level: Level) => void;

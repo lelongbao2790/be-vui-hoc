@@ -1,5 +1,5 @@
-import type { VietnameseWord, EnglishWord, ScrambleSentence, VietnameseRhymePair, EnglishSentence, VietnameseVowelRule, PreschoolItem, PreschoolColor, PreschoolShape } from '../types';
-import { Difficulty } from '../types';
+import type { VietnameseWord, EnglishWord, ScrambleSentence, VietnameseRhymePair, EnglishSentence, VietnameseVowelRule, PreschoolItem, PreschoolColor, PreschoolShape } from '../types.ts';
+import { Difficulty } from '../types.ts';
 
 export const VIETNAMESE_WORDS: VietnameseWord[] = [
     { "image": "☔️", "sentence": "Cơn m__", "missing": "ưa", "to_type": "ua", "answer": "mưa" },

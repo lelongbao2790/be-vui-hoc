@@ -1,6 +1,6 @@
 import React from 'react';
-import { TeddyBearIcon } from './icons/TeddyBearIcon';
-import { AppleIcon } from './icons/AppleIcon';
+import { TeddyBearIcon } from './icons/TeddyBearIcon.tsx';
+import { AppleIcon } from './icons/AppleIcon.tsx';
 
 type AgeGroup = 'preschool' | 'grade1';
 

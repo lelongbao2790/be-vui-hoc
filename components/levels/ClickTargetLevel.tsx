@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { playCorrectSound, playEncouragementSound } from '../../utils/sounds';
-import FeedbackIndicator from '../FeedbackIndicator';
-import { TARGET_EMOJIS } from '../../constants';
-import { useGameLogic } from '../../hooks/useGameLogic';
-import GameEndScreen from '../GameEndScreen';
-import ReviewMistakesScreen from '../ReviewMistakesScreen';
+import { playCorrectSound, playEncouragementSound } from '../../utils/sounds.ts';
+import FeedbackIndicator from '../FeedbackIndicator.tsx';
+import { TARGET_EMOJIS } from '../../constants.ts';
+import { useGameLogic } from '../../hooks/useGameLogic.ts';
+import GameEndScreen from '../GameEndScreen.tsx';
+import ReviewMistakesScreen from '../ReviewMistakesScreen.tsx';
 
 interface ClickTargetLevelProps {
   onCorrect: () => void;

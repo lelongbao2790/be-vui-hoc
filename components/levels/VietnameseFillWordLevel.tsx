@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { getVietnameseWords } from '../../utils/dataLoader';
-import type { VietnameseWord } from '../../types';
-import { playCorrectSound, playEncouragementSound } from '../../utils/sounds';
-import FeedbackIndicator from '../FeedbackIndicator';
-import { useGameLogic } from '../../hooks/useGameLogic';
-import GameEndScreen from '../GameEndScreen';
-import ReviewMistakesScreen from '../ReviewMistakesScreen';
+import { getVietnameseWords } from '../../utils/dataLoader.ts';
+import type { VietnameseWord } from '../../types.ts';
+import { playCorrectSound, playEncouragementSound } from '../../utils/sounds.ts';
+import FeedbackIndicator from '../FeedbackIndicator.tsx';
+import { useGameLogic } from '../../hooks/useGameLogic.ts';
+import GameEndScreen from '../GameEndScreen.tsx';
+import ReviewMistakesScreen from '../ReviewMistakesScreen.tsx';
 
 
 interface IncorrectAttempt {

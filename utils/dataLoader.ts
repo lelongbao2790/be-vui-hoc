@@ -9,7 +9,7 @@ import {
   PRESCHOOL_OBJECTS,
   PRESCHOOL_COLORS,
   PRESCHOOL_SHAPES,
-} from './gameData';
+} from './gameData.ts';
 
 // --- Lớp 1 ---
 export const getVietnameseWords = () => Promise.resolve(VIETNAMESE_WORDS);
