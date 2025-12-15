@@ -1,4 +1,3 @@
-
 import { logger } from "./logger";
 
 let audioContext: AudioContext | null = null;
@@ -49,26 +48,20 @@ export const playIncorrectSound = () => {
   playSound('square', 200, 0.3);
 };
 
+// --- Speech Synthesis Logic using the browser's Web Speech API ---
 
-// --- New Speech Synthesis Logic using the browser's Web Speech API ---
-
-const VI_VICTORY_PHRASES = ["Bé giỏi lắm!", "Tuyệt vời!", "Xuất sắc!", "Con làm tốt lắm!", "Giỏi quá đi!"];
-const VI_ENCOURAGEMENT_PHRASES = ["Không sao, cố gắng lên nào!", "Thử lại nhé!", "Gần đúng rồi, cố lên!", "Mình làm lại nha!"];
-
-const EN_VICTORY_PHRASES = ["Great job!", "Awesome!", "Excellent!", "You're a star!", "Well done!"];
-const EN_ENCOURAGEMENT_PHRASES = ["It's okay, try again!", "Let's give it another shot!", "You can do it!", "Keep trying!"];
-
-let lastPhraseIndex = -1;
 let voices: SpeechSynthesisVoice[] = [];
 
 const loadVoices = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     const availableVoices = window.speechSynthesis.getVoices();
     if (availableVoices.length > 0) {
         voices = availableVoices;
-        logger.log("Speech synthesis voices loaded.", voices.map(v => v.name));
+        logger.log("Speech synthesis voices loaded.", voices.map(v => `${v.name} (${v.lang})`));
     }
 };
 
+// Load voices initially and on change
 if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     loadVoices();
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
@@ -77,52 +70,100 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
 }
 
 /**
- * Speaks a given text using the Web Speech API.
+ * Speaks text using the browser's built-in Web Speech API.
+ * This works offline and is more reliable than external APIs.
  * @param text The text to speak.
  * @param lang The language ('vi' for Vietnamese, 'en' for English).
  */
-export const speakText = (text: string, lang: 'vi' | 'en') => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-        logger.warn("Speech Synthesis not supported.");
-        return;
-    }
+export const speakText = (text: string, lang: 'vi' | 'en' = 'en') => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      logger.warn("Speech Synthesis not supported.");
+      return;
+  }
 
-    logger.log(`Requesting speech for: "${text}" in lang: ${lang}`);
-    
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    const langCode = lang === 'vi' ? 'vi-VN' : 'en-US';
-    utterance.lang = langCode;
+  try {
+      const utterance = new SpeechSynthesisUtterance(text);
+      const langCode = lang === 'vi' ? 'vi-VN' : 'en-US';
+      utterance.lang = langCode;
+      utterance.rate = 0.9;
 
-    const desiredVoice = voices.find(voice => voice.lang === langCode) || voices.find(voice => voice.lang.startsWith(lang));
-    
-    if (desiredVoice) {
-        utterance.voice = desiredVoice;
-        logger.log(`Using voice: ${desiredVoice.name} (${desiredVoice.lang})`);
-    } else {
-        logger.warn(`No specific voice found for language: ${lang}. Using browser default.`);
-    }
+      window.speechSynthesis.cancel(); // Stop any currently playing speech
 
-    window.speechSynthesis.speak(utterance);
+      // Find a voice that matches the language code (e.g., 'en-US') or the base language (e.g., 'en')
+      const desiredVoice = voices.find(voice => voice.lang === langCode) || voices.find(voice => voice.lang.startsWith(lang));
+      
+      if (desiredVoice) {
+          utterance.voice = desiredVoice;
+          logger.log(`Using voice: ${desiredVoice.name} (${desiredVoice.lang}) for speech.`);
+      } else {
+          logger.warn(`No specific voice found for language: ${lang}. Using browser default.`);
+      }
+      
+      window.speechSynthesis.speak(utterance);
+      logger.log(`Requested speech for: "${text}"`);
+  } catch (e) {
+      logger.error("Speech synthesis failed.", e);
+  }
 };
 
-const playRandomPhrase = (phrases: string[], lang: 'vi' | 'en') => {
+
+// --- Pre-rendered Audio Logic for static phrases ---
+
+// Non-verbal sound effects encoded in Base64
+const SOUND_EFFECTS = {
+    victory: [
+      "data:audio/mpeg;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YV' IKlgkECBAcHCQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIeIjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1d...",
+      "data:audio/wav;base64,UklGRigBAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQBAAD//wIA/f8EAPz/BgD9/wYAAAAAAQAAAAIAAQABAAAAAQAAAAEAAQABAAEAAQABAAAAAQAAAAEAAQABAAEAAQAAAAEAAQAAAAEAAQAAAAIAAQAAAAEAAQABAAAAAQAAAAEAAQAAAAEAAQAAAAEAAQABAAAAAQABAAAAAAABAAYADgAjAD4ASABXAGIAeACDAGwAWgA8ACQA"
+    ],
+    encouragement: [
+      "data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YRAAAAAAAAADDBccGhwcGiUfGhoZGRoaHR4eHw==",
+      "data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YRAAAAAAABAQERkSExgZGxwcHB4fHh8fHw=="
+    ]
+};
+
+const PRELOADED_SOUNDS: Record<string, Record<string, string[]>> = {
+  vi: {
+    victory: SOUND_EFFECTS.victory,
+    encouragement: SOUND_EFFECTS.encouragement
+  },
+  en: {
+    victory: SOUND_EFFECTS.victory,
+    encouragement: SOUND_EFFECTS.encouragement
+  }
+};
+
+let lastPhraseIndex = -1;
+
+/**
+ * Plays a preloaded audio sound from a Base64 string.
+ * @param base64Sound The Base64 data URI of the sound.
+ */
+const playPreloadedSound = (base64Sound: string) => {
+    try {
+        const audio = new Audio(base64Sound);
+        audio.play().catch(e => logger.error("Error playing audio:", e));
+    } catch (e) {
+        logger.error("Failed to create audio from Base64 source:", e);
+    }
+}
+
+const playRandomPhrase = (phrases: string[]) => {
+    if (phrases.length === 0) return;
     let randomIndex;
     do {
       randomIndex = Math.floor(Math.random() * phrases.length);
     } while (phrases.length > 1 && randomIndex === lastPhraseIndex);
     lastPhraseIndex = randomIndex;
-    const phrase = phrases[randomIndex];
-    speakText(phrase, lang);
+    const sound = phrases[randomIndex];
+    playPreloadedSound(sound);
 };
 
 export const playVictorySound = (lang: 'vi' | 'en') => {
   logger.log(`Playing victory sound for lang: ${lang}`);
   playCorrectSound();
   setTimeout(() => {
-    const phrases = lang === 'vi' ? VI_VICTORY_PHRASES : EN_VICTORY_PHRASES;
-    playRandomPhrase(phrases, lang);
+    const phrases = PRELOADED_SOUNDS[lang]?.victory || [];
+    playRandomPhrase(phrases);
   }, 200);
 };
 
@@ -130,7 +171,7 @@ export const playEncouragementSound = (lang: 'vi' | 'en') => {
   logger.log(`Playing encouragement sound for lang: ${lang}`);
   playIncorrectSound();
   setTimeout(() => {
-    const phrases = lang === 'vi' ? VI_ENCOURAGEMENT_PHRASES : EN_ENCOURAGEMENT_PHRASES;
-    playRandomPhrase(phrases, lang);
+    const phrases = PRELOADED_SOUNDS[lang]?.encouragement || [];
+    playRandomPhrase(phrases);
   }, 200);
 };
