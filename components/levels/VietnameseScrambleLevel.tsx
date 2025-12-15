@@ -30,12 +30,12 @@ const TIME_LIMITS: Record<Difficulty, number> = {
 
 const VietnameseScrambleLevel: React.FC<VietnameseScrambleLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
   const [allSentences, setAllSentences] = useState<ScrambleSentence[]>([]);
+  const [questionDeck, setQuestionDeck] = useState<ScrambleSentence[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentSentence, setCurrentSentence] = useState<ScrambleSentence | null>(null);
   const [scrambledWords, setScrambledWords] = useState<string[]>([]);
   const [playerAnswer, setPlayerAnswer] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
-  const [usedIndices, setUsedIndices] = useState<number[]>([]);
   
   const gameLogic = useGameLogic<IncorrectAttempt>({
     totalQuestions: TOTAL_QUESTIONS,
@@ -51,9 +51,13 @@ const VietnameseScrambleLevel: React.FC<VietnameseScrambleLevelProps> = ({ diffi
   useEffect(() => {
     getVietnameseScrambleSentences().then(data => {
         setAllSentences(data);
+        // Initial shuffle filtered by difficulty
+        const filtered = data.filter(s => s.difficulty === difficulty);
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+        setQuestionDeck(shuffled);
         setIsLoading(false);
     });
-  }, []);
+  }, [difficulty]); // Refetch/reshuffle if difficulty changes
 
   const shuffleArray = (array: string[]): string[] => {
     let shuffled = [...array];
@@ -69,34 +73,45 @@ const VietnameseScrambleLevel: React.FC<VietnameseScrambleLevelProps> = ({ diffi
   };
 
   const getNewSentence = useCallback(() => {
-    const sentenceList = allSentences.filter(s => s.difficulty === difficulty);
-    if (sentenceList.length === 0) return;
+    let nextSentence: ScrambleSentence;
 
-    let availableIndices = sentenceList.map((_, i) => i).filter(i => !usedIndices.includes(i));
-    if (availableIndices.length === 0 && sentenceList.length > 0) {
-       setUsedIndices([]); // Reset if all used
-       availableIndices = sentenceList.map((_, i) => i);
+    if (questionDeck.length === 0) {
+        // Reshuffle if deck empty
+        const filtered = allSentences.filter(s => s.difficulty === difficulty);
+        if (filtered.length === 0) return;
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+        // Take first, set rest
+        nextSentence = shuffled[0];
+        setQuestionDeck(shuffled.slice(1));
+    } else {
+        nextSentence = questionDeck[0];
+        setQuestionDeck(prev => prev.slice(1));
     }
     
-    const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-    const newSentence = sentenceList[randomIndex];
-    setCurrentSentence(newSentence);
+    setCurrentSentence(nextSentence);
     setPlayerAnswer([]);
-    setScrambledWords(shuffleArray(newSentence.sentence.split(' ')));
-    setUsedIndices(prev => [...prev.filter(i => i !== randomIndex), randomIndex]);
-  }, [allSentences, difficulty, usedIndices]);
+    setScrambledWords(shuffleArray(nextSentence.sentence.split(' ')));
+  }, [allSentences, difficulty, questionDeck]);
   
   const setupGame = useCallback(() => {
     resetGame();
-    setUsedIndices([]);
-    getNewSentence();
-  }, [resetGame, getNewSentence]);
+    if (!isLoading) {
+        getNewSentence();
+    }
+  }, [resetGame, getNewSentence, isLoading]);
   
   useEffect(() => {
-    if (!isLoading && allSentences.length > 0) {
+    if (!isLoading && allSentences.length > 0 && !currentSentence) {
       getNewSentence();
     }
-  }, [isLoading, allSentences, difficulty, gameLogic.currentQuestionIndex]);
+  }, [isLoading, allSentences, currentSentence, getNewSentence]);
+
+  // Next question trigger
+  useEffect(() => {
+      if (gameLogic.currentQuestionIndex > 0 && gameState === 'playing') {
+          getNewSentence();
+      }
+  }, [gameLogic.currentQuestionIndex, gameState]);
 
 
   const handleWordClick = (word: string, index: number) => {
@@ -138,7 +153,7 @@ const VietnameseScrambleLevel: React.FC<VietnameseScrambleLevelProps> = ({ diffi
              <ReviewMistakesScreen
                 incorrectAttempts={incorrectAttempts}
                 onBack={() => setIsReviewing(false)}
-                renderAttempt={(attempt, index) => (
+                renderAttempt={(attempt: IncorrectAttempt, index) => (
                     <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
                         <p className="font-bold text-xl">Câu đúng: <span className="text-green-700">{attempt.correctSentence}</span></p>
                         <p className="text-lg">Bé xếp: <span className="text-red-700">{attempt.playerAnswer || "(bỏ trống)"}</span></p>

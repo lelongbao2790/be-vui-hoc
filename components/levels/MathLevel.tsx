@@ -128,7 +128,7 @@ const MathLevel: React.FC<MathLevelProps> = ({ difficulty, onCorrect, onStatusUp
              <ReviewMistakesScreen
                 incorrectAttempts={incorrectAttempts}
                 onBack={() => setIsReviewing(false)}
-                renderAttempt={(attempt, index) => (
+                renderAttempt={(attempt: IncorrectAttempt, index) => (
                     <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
                         <p className="font-bold text-xl">Câu hỏi: {attempt.problem.a} {attempt.problem.op} {attempt.problem.b}</p>
                         <p className="text-lg text-red-700">Bé chọn: {attempt.selectedAnswer}</p>

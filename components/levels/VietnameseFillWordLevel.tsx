@@ -25,12 +25,12 @@ const TOTAL_QUESTIONS = 5;
 const TIME_LIMIT = 90; // 90 seconds
 
 const VietnameseFillWordLevel: React.FC<VietnameseFillWordLevelProps> = ({ onCorrect, onStatusUpdate, onGameEnd }) => {
-  const [wordList, setWordList] = useState<VietnameseWord[]>([]);
+  const [allWords, setAllWords] = useState<VietnameseWord[]>([]);
+  const [questionDeck, setQuestionDeck] = useState<VietnameseWord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentWord, setCurrentWord] = useState<VietnameseWord | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
-  const [usedIndices, setUsedIndices] = useState<number[]>([]);
   
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -47,40 +47,56 @@ const VietnameseFillWordLevel: React.FC<VietnameseFillWordLevelProps> = ({ onCor
   
   useEffect(() => {
     getVietnameseWords().then(data => {
-      setWordList(data);
+      setAllWords(data);
+      // Shuffle initially
+      const shuffled = [...data].sort(() => Math.random() - 0.5);
+      setQuestionDeck(shuffled);
       setIsLoading(false);
     });
   }, []);
 
   const getNewWord = useCallback(() => {
-    if (wordList.length === 0) return;
-    
-    let availableIndices = wordList.map((_, i) => i).filter(i => !usedIndices.includes(i));
-    if (availableIndices.length === 0 && wordList.length > 0) {
-        // Reset if we've used all words
-        setUsedIndices([]);
-        availableIndices = wordList.map((_, i) => i);
+    // If deck is empty or near empty, reshuffle all words
+    if (questionDeck.length === 0) {
+        if (allWords.length > 0) {
+             const shuffled = [...allWords].sort(() => Math.random() - 0.5);
+             setQuestionDeck(shuffled.slice(1));
+             setCurrentWord(shuffled[0]);
+             setInputValue('');
+        }
+        return;
     }
     
-    const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-    const newWord = wordList[randomIndex];
-    setCurrentWord(newWord);
+    // Pick next card from deck
+    const nextWord = questionDeck[0];
+    setQuestionDeck(prev => prev.slice(1));
+    setCurrentWord(nextWord);
     setInputValue('');
-    setUsedIndices(prev => [...prev.filter(i => i !== randomIndex), randomIndex]);
-  }, [usedIndices, wordList]);
+    
+  }, [questionDeck, allWords]);
   
   const setupGame = useCallback(() => {
     resetGame();
-    setUsedIndices([]);
-    getNewWord();
-  }, [resetGame, getNewWord]);
+    // Do not reset deck here to avoid repetition on replay!
+    // Just get the next word.
+    if (!isLoading) {
+        getNewWord();
+    }
+  }, [resetGame, getNewWord, isLoading]);
 
 
   useEffect(() => {
-    if (!isLoading && wordList.length > 0) {
+    if (!isLoading && allWords.length > 0 && !currentWord) {
       getNewWord();
     }
-  }, [isLoading, wordList, gameLogic.currentQuestionIndex]);
+  }, [isLoading, allWords, currentWord, getNewWord]);
+  
+  // Need to listen to question index change to trigger next question
+  useEffect(() => {
+      if (gameLogic.currentQuestionIndex > 0 && gameState === 'playing') {
+          getNewWord();
+      }
+  }, [gameLogic.currentQuestionIndex, gameState]);
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
@@ -116,7 +132,7 @@ const VietnameseFillWordLevel: React.FC<VietnameseFillWordLevelProps> = ({ onCor
             <ReviewMistakesScreen
                 incorrectAttempts={incorrectAttempts}
                 onBack={() => setIsReviewing(false)}
-                renderAttempt={(attempt, index) => (
+                renderAttempt={(attempt: IncorrectAttempt, index) => (
                     <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
                         <p className="font-bold text-xl">{attempt.word.sentence.replace('__', `[${attempt.word.missing}]`)}</p>
                         <p className="text-lg text-red-700">Bé điền: {attempt.incorrectInput || "(bỏ trống)"}</p>

@@ -27,10 +27,10 @@ const TIME_LIMIT = 90;
 
 const VietnameseRhymeMatchLevel: React.FC<VietnameseRhymeMatchLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
   const [allPairs, setAllPairs] = useState<VietnameseRhymePair[]>([]);
+  const [questionDeck, setQuestionDeck] = useState<VietnameseRhymePair[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPair, setCurrentPair] = useState<VietnameseRhymePair | null>(null);
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
-  const [usedIndices, setUsedIndices] = useState<number[]>([]);
   
   const gameLogic = useGameLogic<IncorrectAttempt>({
     totalQuestions: TOTAL_QUESTIONS,
@@ -46,38 +46,51 @@ const VietnameseRhymeMatchLevel: React.FC<VietnameseRhymeMatchLevelProps> = ({ d
   useEffect(() => {
     getVietnameseRhymes().then(data => {
         setAllPairs(data);
+        const filtered = data.filter(p => p.difficulty === difficulty);
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+        setQuestionDeck(shuffled);
         setIsLoading(false);
     });
-  }, []);
+  }, [difficulty]);
 
   const getNewPair = useCallback(() => {
-    const pairList = allPairs.filter(p => p.difficulty === difficulty);
-    if (pairList.length === 0) return;
+    let nextPair: VietnameseRhymePair;
 
-    let availableIndices = pairList.map((_, i) => i).filter(i => !usedIndices.includes(i));
-    if (availableIndices.length === 0 && pairList.length > 0) {
-        setUsedIndices([]);
-        availableIndices = pairList.map((_, i) => i);
+    if (questionDeck.length === 0) {
+        const filtered = allPairs.filter(p => p.difficulty === difficulty);
+        if (filtered.length === 0) return;
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+        nextPair = shuffled[0];
+        setQuestionDeck(shuffled.slice(1));
+    } else {
+        nextPair = questionDeck[0];
+        setQuestionDeck(prev => prev.slice(1));
     }
+
+    const pairWithShuffledOptions = { ...nextPair };
+    pairWithShuffledOptions.options = [...pairWithShuffledOptions.options].sort(() => Math.random() - 0.5);
+    setCurrentPair(pairWithShuffledOptions);
     
-    const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-    const newPair = { ...pairList[randomIndex] };
-    newPair.options = [...newPair.options].sort(() => Math.random() - 0.5);
-    setCurrentPair(newPair);
-    setUsedIndices(prev => [...prev.filter(i => i !== randomIndex), randomIndex]);
-  }, [usedIndices, allPairs, difficulty]);
+  }, [questionDeck, allPairs, difficulty]);
   
   const setupGame = useCallback(() => {
     resetGame();
-    setUsedIndices([]);
-    getNewPair();
-  }, [resetGame, getNewPair]);
-
-  useEffect(() => {
-    if (!isLoading && allPairs.length > 0) {
+    if (!isLoading) {
         getNewPair();
     }
-  }, [isLoading, allPairs, difficulty, gameLogic.currentQuestionIndex]);
+  }, [resetGame, getNewPair, isLoading]);
+
+  useEffect(() => {
+    if (!isLoading && allPairs.length > 0 && !currentPair) {
+        getNewPair();
+    }
+  }, [isLoading, allPairs, currentPair, getNewPair]);
+
+  useEffect(() => {
+      if (gameLogic.currentQuestionIndex > 0 && gameState === 'playing') {
+          getNewPair();
+      }
+  }, [gameLogic.currentQuestionIndex, gameState]);
   
   const handleOptionClick = (option: string) => {
     if (feedback || !currentPair) return;
@@ -106,7 +119,7 @@ const VietnameseRhymeMatchLevel: React.FC<VietnameseRhymeMatchLevelProps> = ({ d
             <ReviewMistakesScreen
                 incorrectAttempts={incorrectAttempts}
                 onBack={() => setIsReviewing(false)}
-                renderAttempt={(attempt, index) => (
+                renderAttempt={(attempt: IncorrectAttempt, index) => (
                     <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
                         <p className="font-bold text-xl">Tìm vần cho từ: {attempt.pair.word}</p>
                         <p className="text-lg text-red-700">Bé chọn: {attempt.selectedOption}</p>

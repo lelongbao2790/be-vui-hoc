@@ -27,11 +27,11 @@ const TIME_LIMIT = 100;
 
 const EnglishListenTypeLevel: React.FC<EnglishListenTypeLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
   const [allWords, setAllWords] = useState<EnglishWord[]>([]);
+  const [questionDeck, setQuestionDeck] = useState<EnglishWord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentWord, setCurrentWord] = useState<EnglishWord | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
-  const [usedIndices, setUsedIndices] = useState<number[]>([]);
   
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -49,38 +49,50 @@ const EnglishListenTypeLevel: React.FC<EnglishListenTypeLevelProps> = ({ difficu
   useEffect(() => {
     getEnglishWords().then(data => {
         setAllWords(data);
+        const filtered = data.filter(w => w.difficulty === difficulty);
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+        setQuestionDeck(shuffled);
         setIsLoading(false);
     });
-  }, []);
+  }, [difficulty]);
 
   const getNewWord = useCallback(() => {
-    const wordList = allWords.filter(w => w.difficulty === difficulty);
-    if (wordList.length === 0) return;
-    
-    let availableIndices = wordList.map((_, i) => i).filter(i => !usedIndices.includes(i));
-    if (availableIndices.length === 0 && wordList.length > 0) {
-        setUsedIndices([]);
-        availableIndices = wordList.map((_, i) => i);
+    let nextWord: EnglishWord;
+
+    if (questionDeck.length === 0) {
+        const filtered = allWords.filter(w => w.difficulty === difficulty);
+        if (filtered.length === 0) return;
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+        nextWord = shuffled[0];
+        setQuestionDeck(shuffled.slice(1));
+    } else {
+        nextWord = questionDeck[0];
+        setQuestionDeck(prev => prev.slice(1));
     }
-    
-    const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-    const newWord = wordList[randomIndex];
-    setCurrentWord(newWord);
+
+    setCurrentWord(nextWord);
     setInputValue('');
-    setUsedIndices(prev => [...prev.filter(i => i !== randomIndex), randomIndex]);
-  }, [usedIndices, allWords, difficulty]);
+  }, [questionDeck, allWords, difficulty]);
   
   const setupGame = useCallback(() => {
     resetGame();
-    setUsedIndices([]);
-    getNewWord();
-  }, [resetGame, getNewWord]);
-
-  useEffect(() => {
-    if (!isLoading && allWords.length > 0) {
+    if (!isLoading) {
         getNewWord();
     }
-  }, [isLoading, allWords, difficulty, gameLogic.currentQuestionIndex]);
+  }, [resetGame, getNewWord, isLoading]);
+
+  useEffect(() => {
+    if (!isLoading && allWords.length > 0 && !currentWord) {
+        getNewWord();
+    }
+  }, [isLoading, allWords, currentWord, getNewWord]);
+
+  useEffect(() => {
+      if (gameLogic.currentQuestionIndex > 0 && gameState === 'playing') {
+          getNewWord();
+      }
+  }, [gameLogic.currentQuestionIndex, gameState]);
+
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
@@ -125,7 +137,7 @@ const EnglishListenTypeLevel: React.FC<EnglishListenTypeLevelProps> = ({ difficu
                 title="Review Mistakes"
                 incorrectAttempts={incorrectAttempts}
                 onBack={() => setIsReviewing(false)}
-                renderAttempt={(attempt, index) => (
+                renderAttempt={(attempt: IncorrectAttempt, index) => (
                     <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
                         <p className="font-bold text-xl">Correct word: <span className="text-green-700">{attempt.word.word}</span></p>
                         <p className="text-lg text-red-700">You typed: {attempt.incorrectInput || "(empty)"}</p>

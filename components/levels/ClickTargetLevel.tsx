@@ -87,7 +87,7 @@ const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEn
             <ReviewMistakesScreen
                 incorrectAttempts={incorrectAttempts}
                 onBack={() => setIsReviewing(false)}
-                renderAttempt={(attempt, index) => (
+                renderAttempt={(attempt: IncorrectAttempt, index) => (
                     <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
                         <p className="font-bold text-xl">Câu hỏi: Click vào số {attempt.correctNumber}</p>
                         <p className="text-lg text-red-700">Bé chọn: {attempt.clickedNumber}</p>

@@ -26,11 +26,11 @@ const TIME_LIMIT = 90;
 
 const EnglishImageWordMatchLevel: React.FC<EnglishImageWordMatchLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
   const [allWords, setAllWords] = useState<EnglishWord[]>([]);
+  const [questionDeck, setQuestionDeck] = useState<EnglishWord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentWord, setCurrentWord] = useState<EnglishWord | null>(null);
   const [options, setOptions] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
-  const [usedIndices, setUsedIndices] = useState<number[]>([]);
   
   const gameLogic = useGameLogic<IncorrectAttempt>({
     totalQuestions: TOTAL_QUESTIONS,
@@ -46,50 +46,60 @@ const EnglishImageWordMatchLevel: React.FC<EnglishImageWordMatchLevelProps> = ({
   useEffect(() => {
     getEnglishWords().then(data => {
         setAllWords(data);
+        const filtered = data.filter(w => w.difficulty === difficulty);
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+        setQuestionDeck(shuffled);
         setIsLoading(false);
     });
-  }, []);
+  }, [difficulty]);
 
   const getNewChallenge = useCallback(() => {
+    let correctWord: EnglishWord;
     const wordList = allWords.filter(w => w.difficulty === difficulty);
     if (wordList.length < 3) return;
 
-    let availableIndices = wordList.map((_, i) => i).filter(i => !usedIndices.includes(i));
-    if (availableIndices.length === 0 && wordList.length > 0) {
-        setUsedIndices([]);
-        availableIndices = wordList.map((_, i) => i);
+    if (questionDeck.length === 0) {
+        const shuffled = [...wordList].sort(() => Math.random() - 0.5);
+        correctWord = shuffled[0];
+        setQuestionDeck(shuffled.slice(1));
+    } else {
+        correctWord = questionDeck[0];
+        setQuestionDeck(prev => prev.slice(1));
     }
     
-    if (availableIndices.length > 0) {
-        const correctIndexInList = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-        const correctWord = wordList[correctIndexInList];
-        setCurrentWord(correctWord);
-        setUsedIndices(prev => [...prev.filter(i => i !== correctIndexInList), correctIndexInList]);
+    setCurrentWord(correctWord);
 
-        const wrongOptions = new Set<string>();
-        while (wrongOptions.size < 2) {
-            const wrongIndex = Math.floor(Math.random() * wordList.length);
-            if (wrongIndex !== correctIndexInList) {
-                wrongOptions.add(wordList[wrongIndex].word);
-            }
+    const wrongOptions = new Set<string>();
+    while (wrongOptions.size < 2) {
+        const wrongIndex = Math.floor(Math.random() * wordList.length);
+        if (wordList[wrongIndex].word !== correctWord.word) {
+            wrongOptions.add(wordList[wrongIndex].word);
         }
-        
-        const allOptions = [correctWord.word, ...Array.from(wrongOptions)].sort(() => Math.random() - 0.5);
-        setOptions(allOptions);
     }
-  }, [usedIndices, allWords, difficulty]);
+    
+    const allOptions = [correctWord.word, ...Array.from(wrongOptions)].sort(() => Math.random() - 0.5);
+    setOptions(allOptions);
+
+  }, [questionDeck, allWords, difficulty]);
   
   const setupGame = useCallback(() => {
     resetGame();
-    setUsedIndices([]);
-    getNewChallenge();
-  }, [resetGame, getNewChallenge]);
-
-  useEffect(() => {
-    if (!isLoading && allWords.length > 2) {
+    if (!isLoading) {
         getNewChallenge();
     }
-  }, [isLoading, allWords, difficulty, gameLogic.currentQuestionIndex]);
+  }, [resetGame, getNewChallenge, isLoading]);
+
+  useEffect(() => {
+    if (!isLoading && allWords.length > 2 && !currentWord) {
+        getNewChallenge();
+    }
+  }, [isLoading, allWords, currentWord, getNewChallenge]);
+
+  useEffect(() => {
+      if (gameLogic.currentQuestionIndex > 0 && gameState === 'playing') {
+          getNewChallenge();
+      }
+  }, [gameLogic.currentQuestionIndex, gameState]);
   
   const handleOptionClick = (option: string) => {
     if (feedback || !currentWord) return;
@@ -121,7 +131,7 @@ const EnglishImageWordMatchLevel: React.FC<EnglishImageWordMatchLevelProps> = ({
                 title="Review Mistakes"
                 incorrectAttempts={incorrectAttempts}
                 onBack={() => setIsReviewing(false)}
-                renderAttempt={(attempt, index) => (
+                renderAttempt={(attempt: IncorrectAttempt, index) => (
                     <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
                         <p className="font-bold text-xl">Image: {attempt.word.image}</p>
                         <p className="text-lg text-red-700">You chose: {attempt.selectedOption}</p>

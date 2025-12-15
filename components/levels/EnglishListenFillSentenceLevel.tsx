@@ -28,11 +28,11 @@ const TIME_LIMIT = 120;
 
 const EnglishListenFillSentenceLevel: React.FC<EnglishListenFillSentenceLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
   const [allSentences, setAllSentences] = useState<EnglishSentence[]>([]);
+  const [questionDeck, setQuestionDeck] = useState<EnglishSentence[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentSentence, setCurrentSentence] = useState<EnglishSentence | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
-  const [usedIndices, setUsedIndices] = useState<number[]>([]);
   
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -50,39 +50,50 @@ const EnglishListenFillSentenceLevel: React.FC<EnglishListenFillSentenceLevelPro
   useEffect(() => {
     getEnglishSentences().then(data => {
         setAllSentences(data);
+        const filtered = data.filter(s => s.difficulty === difficulty);
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+        setQuestionDeck(shuffled);
         setIsLoading(false);
     });
-  }, []);
+  }, [difficulty]);
 
   const getNewSentence = useCallback(() => {
-    const sentenceList = allSentences.filter(s => s.difficulty === difficulty);
-    if (sentenceList.length === 0) return;
+    let nextSentence: EnglishSentence;
 
-    let availableIndices = sentenceList.map((_, i) => i).filter(i => !usedIndices.includes(i));
-    if (availableIndices.length === 0 && sentenceList.length > 0) {
-        setUsedIndices([]);
-        availableIndices = sentenceList.map((_, i) => i);
+    if (questionDeck.length === 0) {
+        const filtered = allSentences.filter(s => s.difficulty === difficulty);
+        if (filtered.length === 0) return;
+        const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+        nextSentence = shuffled[0];
+        setQuestionDeck(shuffled.slice(1));
+    } else {
+        nextSentence = questionDeck[0];
+        setQuestionDeck(prev => prev.slice(1));
     }
-    
-    const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-    const newSentence = sentenceList[randomIndex];
-    setCurrentSentence(newSentence);
+
+    setCurrentSentence(nextSentence);
     setInputValue('');
-    setUsedIndices(prev => [...prev.filter(i => i !== randomIndex), randomIndex]);
     
-  }, [usedIndices, allSentences, difficulty]);
+  }, [questionDeck, allSentences, difficulty]);
   
   const setupGame = useCallback(() => {
     resetGame();
-    setUsedIndices([]);
-    getNewSentence();
-  }, [resetGame, getNewSentence]);
-
-  useEffect(() => {
-    if (!isLoading && allSentences.length > 0) {
+    if (!isLoading) {
         getNewSentence();
     }
-  }, [isLoading, allSentences, difficulty, gameLogic.currentQuestionIndex]);
+  }, [resetGame, getNewSentence, isLoading]);
+
+  useEffect(() => {
+    if (!isLoading && allSentences.length > 0 && !currentSentence) {
+        getNewSentence();
+    }
+  }, [isLoading, allSentences, currentSentence, getNewSentence]);
+
+  useEffect(() => {
+      if (gameLogic.currentQuestionIndex > 0 && gameState === 'playing') {
+          getNewSentence();
+      }
+  }, [gameLogic.currentQuestionIndex, gameState]);
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
@@ -128,7 +139,7 @@ const EnglishListenFillSentenceLevel: React.FC<EnglishListenFillSentenceLevelPro
                 title="Review Mistakes"
                 incorrectAttempts={incorrectAttempts}
                 onBack={() => setIsReviewing(false)}
-                renderAttempt={(attempt, index) => (
+                renderAttempt={(attempt: IncorrectAttempt, index) => (
                     <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
                         <p className="font-bold text-xl">{attempt.sentence.sentence.replace('__', `[${attempt.sentence.missing}]`)}</p>
                         <p className="text-lg text-red-700">You typed: {attempt.incorrectInput || "(empty)"}</p>
