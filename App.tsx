@@ -13,7 +13,7 @@ import { logger } from './utils/logger';
 
 type GameState = 'selecting_subject' | 'selecting_level' | 'selecting_difficulty' | 'playing';
 type AgeGroup = 'preschool' | 'grade1';
-const APP_VERSION = '1.6.1-fix-navigation';
+const APP_VERSION = '1.6.2-fix-html';
 
 const App: React.FC = () => {
   const [selectedAgeGroup, setSelectedAgeGroup] = useState<AgeGroup | null>(null);
