@@ -1,0 +1,14 @@
+
+[
+  { "id": "red", "name": "Màu Đỏ", "hex": "#ef4444" },
+  { "id": "blue", "name": "Màu Xanh Dương", "hex": "#3b82f6" },
+  { "id": "green", "name": "Màu Xanh Lá", "hex": "#22c55e" },
+  { "id": "yellow", "name": "Màu Vàng", "hex": "#eab308" },
+  { "id": "orange", "name": "Màu Cam", "hex": "#f97316" },
+  { "id": "purple", "name": "Màu Tím", "hex": "#a855f7" },
+  { "id": "pink", "name": "Màu Hồng", "hex": "#ec4899" },
+  { "id": "black", "name": "Màu Đen", "hex": "#1f2937" },
+  { "id": "white", "name": "Màu Trắng", "hex": "#ffffff" },
+  { "id": "brown", "name": "Màu Nâu", "hex": "#78350f" },
+  { "id": "gray", "name": "Màu Xám", "hex": "#6b7280" }
+]
