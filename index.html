@@ -5,6 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bé Vui Học - Game Giáo Dục</title>
+    <!--
+      NOTE: Using the Tailwind CDN is not recommended for production.
+      For this educational project, it's used for simplicity to avoid a build step.
+    -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,10 +18,15 @@
         font-family: 'Baloo 2', cursive;
       }
     </style>
-  <script type="importmap">
+    <!-- Add Babel for in-browser JSX/TSX transpilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Import Map for React dependencies -->
+    <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/client": "https://esm.sh/react-dom@^19.2.3/client",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/"
   }
@@ -27,6 +36,14 @@
 </head>
   <body class="bg-sky-100">
     <div id="root"></div>
+    <!-- 
+      Load the main application script.
+      - 'type="text/babel"' tells Babel to transpile this script.
+      - 'data-presets="react,typescript"' enables TSX and TypeScript syntax.
+      - 'data-type="module"' preserves the ES module behavior (imports/exports).
+      - 'src="./index.tsx"' uses a relative path to work correctly on GitHub Pages.
+    -->
+    <script type="text/babel" data-presets="react,typescript" data-type="module" src="./index.tsx"></script>
   <script type="module" src="/index.tsx"></script>
 </body>
 </html>

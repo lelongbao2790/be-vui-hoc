@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { playCorrectSound } from '../../utils/sounds';
-import { CLICK_EMOJIS } from '../../constants';
-import { Difficulty } from '../../types';
+import { playCorrectSound } from '../../utils/sounds.ts';
+import { CLICK_EMOJIS } from '../../constants.ts';
+import { Difficulty } from '../../types.ts';
 
 interface ClickBasicLevelProps {
   difficulty: Difficulty;

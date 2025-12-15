@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { playCorrectSound, playIncorrectSound } from '../../utils/sounds';
-import { logger } from '../../utils/logger';
-import type { Difficulty } from '../../types';
+import { playCorrectSound, playIncorrectSound } from '../../utils/sounds.ts';
+import { logger } from '../../utils/logger.ts';
+import type { Difficulty } from '../../types.ts';
 
 interface TypingBasicLevelProps {
   difficulty: Difficulty;

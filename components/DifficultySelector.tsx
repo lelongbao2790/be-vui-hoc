@@ -1,7 +1,8 @@
+
 import React from 'react';
-import type { Level, Difficulty } from '../types';
-import { Difficulty as DifficultyEnum } from '../types';
-import { LevelType } from '../types';
+import type { Level, Difficulty } from '../types.ts';
+import { Difficulty as DifficultyEnum } from '../types.ts';
+import { LevelType } from '../types.ts';
 
 interface DifficultySelectorProps {
   level: Level;

@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { getEnglishWords } from '../../utils/dataLoader';
-import type { EnglishWord, Difficulty } from '../../types';
-import { playCorrectSound, playEncouragementSound, playVictorySound, speakText } from '../../utils/sounds';
-import FeedbackIndicator from '../FeedbackIndicator';
-import { ListenIcon } from '../icons/ListenIcon';
+import { getEnglishWords } from '../../utils/dataLoader.ts';
+import type { EnglishWord, Difficulty } from '../../types.ts';
+import { playCorrectSound, playEncouragementSound, playVictorySound, speakText } from '../../utils/sounds.ts';
+import FeedbackIndicator from '../FeedbackIndicator.tsx';
+import { ListenIcon } from '../icons/ListenIcon.tsx';
 
 interface IncorrectAttempt {
     word: EnglishWord;

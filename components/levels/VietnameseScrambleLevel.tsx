@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { getVietnameseScrambleSentences } from '../../utils/dataLoader';
-import { Difficulty, type ScrambleSentence } from '../../types';
-import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds';
-import FeedbackIndicator from '../FeedbackIndicator';
+import { getVietnameseScrambleSentences } from '../../utils/dataLoader.ts';
+import { Difficulty, type ScrambleSentence } from '../../types.ts';
+import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds.ts';
+import FeedbackIndicator from '../FeedbackIndicator.tsx';
 
 interface IncorrectAttempt {
     correctSentence: string;

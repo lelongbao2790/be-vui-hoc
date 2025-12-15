@@ -1,14 +1,14 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
-import LevelSelector from './components/LevelSelector';
-import GameScreen from './components/GameScreen';
-import DifficultySelector from './components/DifficultySelector';
-import SubjectSelector from './components/SubjectSelector';
-import type { Level, Difficulty, Subject } from './types';
-import { StarIcon } from './components/icons/StarIcon';
-import { BackIcon } from './components/icons/BackIcon';
-import { loadHighScores, saveHighScores } from './utils/storage';
-import { logger } from './utils/logger';
+import LevelSelector from './components/LevelSelector.tsx';
+import GameScreen from './components/GameScreen.tsx';
+import DifficultySelector from './components/DifficultySelector.tsx';
+import SubjectSelector from './components/SubjectSelector.tsx';
+import type { Level, Difficulty, Subject } from './types.ts';
+import { StarIcon } from './components/icons/StarIcon.tsx';
+import { BackIcon } from './components/icons/BackIcon.tsx';
+import { loadHighScores, saveHighScores } from './utils/storage.ts';
+import { logger } from './utils/logger.ts';
 
 type GameState = 'selecting_subject' | 'selecting_level' | 'selecting_difficulty' | 'playing';
 const APP_VERSION = '1.3.0';

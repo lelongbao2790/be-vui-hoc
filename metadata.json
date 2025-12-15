@@ -1,5 +1,5 @@
-
 {
   "name": "Bé Vui Học",
-  "description": "Một trò chơi giáo dục dành cho trẻ em lớp 1 để luyện kỹ năng sử dụng chuột và gõ bàn phím thông qua các bài tập vui nhộn về click, toán học và tiếng Việt. Ứng dụng chạy hoàn toàn cục bộ, không cần kết nối internet."
+  "description": "Một trò chơi giáo dục dành cho trẻ em lớp 1 để luyện kỹ năng sử dụng chuột và gõ bàn phím thông qua các bài tập vui nhộn về click, toán học và tiếng Việt. Ứng dụng chạy hoàn toàn cục bộ, không cần kết nối internet.",
+  "requestFramePermissions": []
 }

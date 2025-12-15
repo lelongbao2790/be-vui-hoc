@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { getVietnameseWords } from '../../utils/dataLoader';
-import type { VietnameseWord, Difficulty } from '../../types';
-import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds';
-import FeedbackIndicator from '../FeedbackIndicator';
+import { getVietnameseWords } from '../../utils/dataLoader.ts';
+import type { VietnameseWord, Difficulty } from '../../types.ts';
+import { playCorrectSound, playEncouragementSound, playVictorySound } from '../../utils/sounds.ts';
+import FeedbackIndicator from '../FeedbackIndicator.tsx';
 
 interface IncorrectAttempt {
     word: VietnameseWord;

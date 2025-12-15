@@ -1,6 +1,6 @@
 
-import type { Level } from './types';
-import { LevelType, Difficulty, Subject } from './types';
+import type { Level } from './types.ts';
+import { LevelType, Difficulty, Subject } from './types.ts';
 
 export const LEVELS: Level[] = [
   {
