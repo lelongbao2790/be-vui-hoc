@@ -15,12 +15,19 @@ import { ImageWordMatchIcon } from './icons/ImageWordMatchIcon';
 import { SentenceListenIcon } from './icons/SentenceListenIcon';
 import { TypingIcon } from './icons/TypingIcon';
 import { VietnameseVowelIcon } from './icons/VietnameseVowelIcon';
+// FIX: Import preschool icons to satisfy the Record type for levelIcons.
+import { PaletteIcon } from './icons/PaletteIcon';
+import { PawIcon } from './icons/PawIcon';
+import { BlocksIcon } from './icons/BlocksIcon';
+import { ShapesIcon } from './icons/ShapesIcon';
+import { NumbersIcon } from './icons/NumbersIcon';
 
 interface LevelSelectorProps {
   subject: Subject;
   onSelectLevel: (level: Level) => void;
 }
 
+// FIX: Add preschool icons to satisfy the Record type. Although this component is only for Grade 1 levels, the type requires all LevelType keys to be present.
 const levelIcons: Record<LevelType, React.ReactElement> = {
     [LevelType.CLICK_BASIC]: <ClickIcon className="w-16 h-16" />,
     [LevelType.CLICK_TARGET]: <TargetIcon className="w-16 h-16" />,
@@ -34,6 +41,11 @@ const levelIcons: Record<LevelType, React.ReactElement> = {
     [LevelType.ENGLISH_LISTEN_FILL_SENTENCE]: <SentenceListenIcon className="w-16 h-16" />,
     [LevelType.TYPING_BASIC]: <TypingIcon className="w-16 h-16" />,
     [LevelType.TYPING_VIETNAMESE_VOWELS]: <VietnameseVowelIcon className="w-16 h-16" />,
+    [LevelType.PRESCHOOL_COLORS]: <PaletteIcon className="w-16 h-16" />,
+    [LevelType.PRESCHOOL_ANIMALS]: <PawIcon className="w-16 h-16" />,
+    [LevelType.PRESCHOOL_OBJECTS]: <BlocksIcon className="w-16 h-16" />,
+    [LevelType.PRESCHOOL_SHAPES]: <ShapesIcon className="w-16 h-16" />,
+    [LevelType.PRESCHOOL_COUNTING]: <NumbersIcon className="w-16 h-16" />,
 };
 
 const levelColors: Record<string, string> = {

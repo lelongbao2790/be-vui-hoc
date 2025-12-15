@@ -17,6 +17,7 @@ interface VietnameseScrambleLevelProps {
   onCorrect: () => void;
   onStatusUpdate: (status: { timeLeft: number; currentQuestion: number; totalQuestions: number; }) => void;
   onGameEnd: () => void;
+  onGoToMenu: () => void;
 }
 
 type FeedbackStatus = 'correct' | 'incorrect' | null;
@@ -28,7 +29,7 @@ const TIME_LIMITS: Record<Difficulty, number> = {
     [Difficulty.HARD]: 180,
 };
 
-const VietnameseScrambleLevel: React.FC<VietnameseScrambleLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
+const VietnameseScrambleLevel: React.FC<VietnameseScrambleLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd, onGoToMenu }) => {
   const [allSentences, setAllSentences] = useState<ScrambleSentence[]>([]);
   const [questionDeck, setQuestionDeck] = useState<ScrambleSentence[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -167,6 +168,7 @@ const VietnameseScrambleLevel: React.FC<VietnameseScrambleLevelProps> = ({ diffi
        <GameEndScreen
           title={timeLeft > 0 ? "Hoàn thành!" : "Hết giờ!"}
           onReset={setupGame}
+          onGoToMenu={onGoToMenu}
           onReview={() => setIsReviewing(true)}
           showReviewButton={incorrectAttempts.length > 0}
         >

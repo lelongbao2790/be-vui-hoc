@@ -17,6 +17,7 @@ interface EnglishImageWordMatchLevelProps {
   onCorrect: () => void;
   onStatusUpdate: (status: { timeLeft: number; currentQuestion: number; totalQuestions: number; }) => void;
   onGameEnd: () => void;
+  onGoToMenu: () => void;
 }
 
 type FeedbackStatus = 'correct' | 'incorrect' | null;
@@ -24,7 +25,7 @@ type FeedbackStatus = 'correct' | 'incorrect' | null;
 const TOTAL_QUESTIONS = 5;
 const TIME_LIMIT = 90;
 
-const EnglishImageWordMatchLevel: React.FC<EnglishImageWordMatchLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
+const EnglishImageWordMatchLevel: React.FC<EnglishImageWordMatchLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd, onGoToMenu }) => {
   const [allWords, setAllWords] = useState<EnglishWord[]>([]);
   const [questionDeck, setQuestionDeck] = useState<EnglishWord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -146,6 +147,7 @@ const EnglishImageWordMatchLevel: React.FC<EnglishImageWordMatchLevelProps> = ({
         <GameEndScreen
             title={timeLeft > 0 ? "Complete!" : "Time's up!"}
             onReset={setupGame}
+            onGoToMenu={onGoToMenu}
             onReview={() => setIsReviewing(true)}
             showReviewButton={incorrectAttempts.length > 0}
         >

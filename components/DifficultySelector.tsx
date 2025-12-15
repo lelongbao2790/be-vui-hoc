@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { Level, Difficulty } from '../types';
 import { Difficulty as DifficultyEnum } from '../types';
@@ -8,6 +9,7 @@ interface DifficultySelectorProps {
   onSelectDifficulty: (difficulty: Difficulty) => void;
 }
 
+// FIX: Added missing preschool level types to satisfy the Record type.
 const difficultyLabels: Record<LevelType, Partial<Record<Difficulty, string>>> = {
     [LevelType.CLICK_BASIC]: {
         [DifficultyEnum.EASY]: 'Dễ (60 giây)',
@@ -47,6 +49,11 @@ const difficultyLabels: Record<LevelType, Partial<Record<Difficulty, string>>> =
     // Fix: Add missing properties for TYPING_BASIC and TYPING_VIETNAMESE_VOWELS
     [LevelType.TYPING_BASIC]: {},
     [LevelType.TYPING_VIETNAMESE_VOWELS]: {},
+    [LevelType.PRESCHOOL_COLORS]: {},
+    [LevelType.PRESCHOOL_ANIMALS]: {},
+    [LevelType.PRESCHOOL_OBJECTS]: {},
+    [LevelType.PRESCHOOL_SHAPES]: {},
+    [LevelType.PRESCHOOL_COUNTING]: {},
 };
 
 const getLabel = (levelType: LevelType, difficulty: Difficulty): string => {

@@ -19,6 +19,7 @@ interface EnglishListenFillSentenceLevelProps {
   onCorrect: () => void;
   onStatusUpdate: (status: { timeLeft: number; currentQuestion: number; totalQuestions: number; }) => void;
   onGameEnd: () => void;
+  onGoToMenu: () => void;
 }
 
 type FeedbackStatus = 'correct' | 'incorrect' | null;
@@ -26,7 +27,7 @@ type FeedbackStatus = 'correct' | 'incorrect' | null;
 const TOTAL_QUESTIONS = 5;
 const TIME_LIMIT = 120;
 
-const EnglishListenFillSentenceLevel: React.FC<EnglishListenFillSentenceLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
+const EnglishListenFillSentenceLevel: React.FC<EnglishListenFillSentenceLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd, onGoToMenu }) => {
   const [allSentences, setAllSentences] = useState<EnglishSentence[]>([]);
   const [questionDeck, setQuestionDeck] = useState<EnglishSentence[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -152,6 +153,7 @@ const EnglishListenFillSentenceLevel: React.FC<EnglishListenFillSentenceLevelPro
         <GameEndScreen
             title={timeLeft > 0 ? "Complete!" : "Time's up!"}
             onReset={setupGame}
+            onGoToMenu={onGoToMenu}
             onReview={() => setIsReviewing(true)}
             showReviewButton={incorrectAttempts.length > 0}
         >

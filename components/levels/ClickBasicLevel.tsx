@@ -9,6 +9,7 @@ interface ClickBasicLevelProps {
   onCorrect: () => void;
   onStatusUpdate: (status: { score: number; timeLeft: number }) => void;
   onGameEnd: () => void;
+  onGoToMenu: () => void;
 }
 
 type GameState = 'playing' | 'finished';
@@ -19,7 +20,7 @@ const TIME_LIMITS: Record<Difficulty, number> = {
     [Difficulty.HARD]: 30,
 };
 
-const ClickBasicLevel: React.FC<ClickBasicLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
+const ClickBasicLevel: React.FC<ClickBasicLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd, onGoToMenu }) => {
   const [position, setPosition] = useState({ top: '50%', left: '50%' });
   const [emoji, setEmoji] = useState('🎯');
   const [key, setKey] = useState(0);
@@ -84,7 +85,7 @@ const ClickBasicLevel: React.FC<ClickBasicLevelProps> = ({ difficulty, onCorrect
 
   if (gameState === 'finished') {
     return (
-        <GameEndScreen title="Hết giờ!" onReset={setupGame}>
+        <GameEndScreen title="Hết giờ!" onReset={setupGame} onGoToMenu={onGoToMenu}>
              <p className="text-3xl">Điểm của bạn là: <span className="font-bold text-blue-600">{score}</span></p>
         </GameEndScreen>
     )

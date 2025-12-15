@@ -1,6 +1,6 @@
 
 import type { Level } from './types';
-import { LevelType, Difficulty, Subject } from './types';
+import { LevelType, Difficulty, Subject, PreschoolSubject } from './types';
 
 export const LEVELS: Level[] = [
   {
@@ -85,6 +85,44 @@ export const LEVELS: Level[] = [
     subject: Subject.TYPING,
     title: 'Gõ Dấu Tiếng Việt',
     description: 'Học cách gõ chữ và dấu tiếng Việt.',
+    difficulties: [Difficulty.EASY],
+  },
+];
+
+export const PRESCHOOL_LEVELS: Level[] = [
+  {
+    type: LevelType.PRESCHOOL_COLORS,
+    subject: PreschoolSubject.COLORS,
+    title: 'Màu Sắc',
+    description: 'Bé học về các màu sắc cơ bản.',
+    difficulties: [Difficulty.EASY],
+  },
+  {
+    type: LevelType.PRESCHOOL_ANIMALS,
+    subject: PreschoolSubject.ANIMALS,
+    title: 'Con Vật',
+    description: 'Nhận biết các con vật quen thuộc.',
+    difficulties: [Difficulty.EASY],
+  },
+  {
+    type: LevelType.PRESCHOOL_OBJECTS,
+    subject: PreschoolSubject.OBJECTS,
+    title: 'Đồ Vật',
+    description: 'Gọi tên những đồ vật quanh bé.',
+    difficulties: [Difficulty.EASY],
+  },
+  {
+    type: LevelType.PRESCHOOL_SHAPES,
+    subject: PreschoolSubject.SHAPES,
+    title: 'Hình Dạng',
+    description: 'Khám phá thế giới hình dạng.',
+    difficulties: [Difficulty.EASY],
+  },
+  {
+    type: LevelType.PRESCHOOL_COUNTING,
+    subject: PreschoolSubject.COUNTING,
+    title: 'Đếm Số',
+    description: 'Tập đếm số từ 1 đến 10.',
     difficulties: [Difficulty.EASY],
   },
 ];

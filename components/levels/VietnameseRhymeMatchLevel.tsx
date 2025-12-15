@@ -18,6 +18,7 @@ interface VietnameseRhymeMatchLevelProps {
   onCorrect: () => void;
   onStatusUpdate: (status: { timeLeft: number; currentQuestion: number; totalQuestions: number; }) => void;
   onGameEnd: () => void;
+  onGoToMenu: () => void;
 }
 
 type FeedbackStatus = 'correct' | 'incorrect' | null;
@@ -25,7 +26,7 @@ type FeedbackStatus = 'correct' | 'incorrect' | null;
 const TOTAL_QUESTIONS = 5;
 const TIME_LIMIT = 90;
 
-const VietnameseRhymeMatchLevel: React.FC<VietnameseRhymeMatchLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
+const VietnameseRhymeMatchLevel: React.FC<VietnameseRhymeMatchLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd, onGoToMenu }) => {
   const [allPairs, setAllPairs] = useState<VietnameseRhymePair[]>([]);
   const [questionDeck, setQuestionDeck] = useState<VietnameseRhymePair[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -134,6 +135,7 @@ const VietnameseRhymeMatchLevel: React.FC<VietnameseRhymeMatchLevelProps> = ({ d
         <GameEndScreen
           title={timeLeft > 0 ? "Hoàn thành!" : "Hết giờ!"}
           onReset={setupGame}
+          onGoToMenu={onGoToMenu}
           onReview={() => setIsReviewing(true)}
           showReviewButton={incorrectAttempts.length > 0}
         >

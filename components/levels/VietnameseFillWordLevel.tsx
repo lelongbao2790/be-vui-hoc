@@ -17,6 +17,7 @@ interface VietnameseFillWordLevelProps {
   onCorrect: () => void;
   onStatusUpdate: (status: { timeLeft: number; currentQuestion: number; totalQuestions: number; }) => void;
   onGameEnd: () => void;
+  onGoToMenu: () => void;
 }
 
 type FeedbackStatus = 'correct' | 'incorrect' | null;
@@ -24,7 +25,7 @@ type FeedbackStatus = 'correct' | 'incorrect' | null;
 const TOTAL_QUESTIONS = 5;
 const TIME_LIMIT = 90; // 90 seconds
 
-const VietnameseFillWordLevel: React.FC<VietnameseFillWordLevelProps> = ({ onCorrect, onStatusUpdate, onGameEnd }) => {
+const VietnameseFillWordLevel: React.FC<VietnameseFillWordLevelProps> = ({ onCorrect, onStatusUpdate, onGameEnd, onGoToMenu }) => {
   const [allWords, setAllWords] = useState<VietnameseWord[]>([]);
   const [questionDeck, setQuestionDeck] = useState<VietnameseWord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -147,6 +148,7 @@ const VietnameseFillWordLevel: React.FC<VietnameseFillWordLevelProps> = ({ onCor
         <GameEndScreen
             title={timeLeft > 0 ? "Hoàn thành!" : "Hết giờ!"}
             onReset={setupGame}
+            onGoToMenu={onGoToMenu}
             onReview={() => setIsReviewing(true)}
             showReviewButton={incorrectAttempts.length > 0}
         >

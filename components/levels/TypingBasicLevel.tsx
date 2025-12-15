@@ -9,6 +9,7 @@ interface TypingBasicLevelProps {
   onCorrect: (points: number) => void;
   onStatusUpdate: (status: { cpm: number; accuracy: number; }) => void;
   onGameEnd: () => void;
+  onGoToMenu: () => void;
 }
 
 type GameState = 'playing' | 'finished';
@@ -27,7 +28,7 @@ const generateText = () => {
     return text.trim();
 }
 
-const TypingBasicLevel: React.FC<TypingBasicLevelProps> = ({ onCorrect, onStatusUpdate, onGameEnd }) => {
+const TypingBasicLevel: React.FC<TypingBasicLevelProps> = ({ onCorrect, onStatusUpdate, onGameEnd, onGoToMenu }) => {
   const [textToType, setTextToType] = useState('');
   const [userInput, setUserInput] = useState('');
   const [gameState, setGameState] = useState<GameState>('playing');
@@ -103,7 +104,7 @@ const TypingBasicLevel: React.FC<TypingBasicLevelProps> = ({ onCorrect, onStatus
 
   if (gameState === 'finished') {
     return (
-        <GameEndScreen title="Hoàn thành!" onReset={setupGame}>
+        <GameEndScreen title="Hoàn thành!" onReset={setupGame} onGoToMenu={onGoToMenu}>
             <div className="text-2xl space-y-2">
                 <p>Tốc độ: <span className="font-bold text-blue-600">{finalStats.cpm} cpm</span></p>
                 <p>Chính xác: <span className="font-bold text-green-600">{finalStats.accuracy}%</span></p>

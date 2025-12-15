@@ -14,6 +14,7 @@ import EnglishImageWordMatchLevel from './levels/EnglishImageWordMatchLevel';
 import EnglishListenFillSentenceLevel from './levels/EnglishListenFillSentenceLevel';
 import TypingBasicLevel from './levels/TypingBasicLevel';
 import TypingVietnameseVowelsLevel from './levels/TypingVietnameseVowelsLevel';
+import PreschoolGameLevel from './levels/preschool/PreschoolGameLevel';
 import { HomeIcon } from './icons/HomeIcon';
 
 interface GameScreenProps {
@@ -43,32 +44,40 @@ const GameScreen: React.FC<GameScreenProps> = ({ level, difficulty, onGoHome, on
 
   const renderLevel = () => {
     switch (level.type) {
+      // Grade 1 Levels
       case LevelType.CLICK_BASIC:
-        return <ClickBasicLevel difficulty={difficulty} onCorrect={() => onCorrectAnswer(1)} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />; // 1 point per click
+        return <ClickBasicLevel difficulty={difficulty} onCorrect={() => onCorrectAnswer(1)} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} onGoToMenu={onGoHome} />; // 1 point per click
       case LevelType.CLICK_TARGET:
-        // FIX: Removed unused `difficulty` prop. This level only has one difficulty setting.
-        return <ClickTargetLevel onCorrect={onCorrectAnswer} onGameEnd={onGameEnd} onStatusUpdate={handleStatusUpdate} />;
+        return <ClickTargetLevel onCorrect={onCorrectAnswer} onGameEnd={onGameEnd} onStatusUpdate={handleStatusUpdate} onGoToMenu={onGoHome} />;
       case LevelType.MATH_ADD_SUBTRACT:
-        return <MathLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
+        return <MathLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} onGoToMenu={onGoHome} />;
       case LevelType.VIETNAMESE_FILL_WORD:
-        // FIX: Removed unused `difficulty` prop. This level only has one difficulty setting.
-        return <VietnameseFillWordLevel onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
+        return <VietnameseFillWordLevel onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} onGoToMenu={onGoHome} />;
       case LevelType.VIETNAMESE_SCRAMBLE_WORD:
-        return <VietnameseScrambleLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
+        return <VietnameseScrambleLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} onGoToMenu={onGoHome} />;
       case LevelType.VIETNAMESE_RHYME_MATCH:
-        return <VietnameseRhymeMatchLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
+        return <VietnameseRhymeMatchLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} onGoToMenu={onGoHome} />;
       case LevelType.ENGLISH_FILL_WORD:
-        return <EnglishFillWordLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
+        return <EnglishFillWordLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} onGoToMenu={onGoHome} />;
       case LevelType.ENGLISH_LISTEN_TYPE:
-        return <EnglishListenTypeLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
+        return <EnglishListenTypeLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} onGoToMenu={onGoHome} />;
       case LevelType.ENGLISH_IMAGE_WORD_MATCH:
-        return <EnglishImageWordMatchLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
+        return <EnglishImageWordMatchLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} onGoToMenu={onGoHome} />;
       case LevelType.ENGLISH_LISTEN_FILL_SENTENCE:
-        return <EnglishListenFillSentenceLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
+        return <EnglishListenFillSentenceLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} onGoToMenu={onGoHome} />;
       case LevelType.TYPING_BASIC:
-        return <TypingBasicLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
+        return <TypingBasicLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} onGoToMenu={onGoHome} />;
       case LevelType.TYPING_VIETNAMESE_VOWELS:
         return <TypingVietnameseVowelsLevel difficulty={difficulty} onCorrect={onCorrectAnswer} onStatusUpdate={handleStatusUpdate} onGameEnd={onGameEnd} />;
+      
+      // Preschool Levels
+      case LevelType.PRESCHOOL_COLORS:
+      case LevelType.PRESCHOOL_ANIMALS:
+      case LevelType.PRESCHOOL_OBJECTS:
+      case LevelType.PRESCHOOL_SHAPES:
+      case LevelType.PRESCHOOL_COUNTING:
+        return <PreschoolGameLevel level={level} onCorrect={onCorrectAnswer} onGameEnd={onGameEnd} onStatusUpdate={handleStatusUpdate} onGoToMenu={onGoHome} />;
+        
       default:
         return <div>Trò chơi không tồn tại</div>;
     }

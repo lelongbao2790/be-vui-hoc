@@ -18,6 +18,7 @@ interface EnglishListenTypeLevelProps {
   onCorrect: () => void;
   onStatusUpdate: (status: { timeLeft: number; currentQuestion: number; totalQuestions: number; }) => void;
   onGameEnd: () => void;
+  onGoToMenu: () => void;
 }
 
 type FeedbackStatus = 'correct' | 'incorrect' | null;
@@ -25,7 +26,7 @@ type FeedbackStatus = 'correct' | 'incorrect' | null;
 const TOTAL_QUESTIONS = 5;
 const TIME_LIMIT = 100;
 
-const EnglishListenTypeLevel: React.FC<EnglishListenTypeLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
+const EnglishListenTypeLevel: React.FC<EnglishListenTypeLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd, onGoToMenu }) => {
   const [allWords, setAllWords] = useState<EnglishWord[]>([]);
   const [questionDeck, setQuestionDeck] = useState<EnglishWord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -151,6 +152,7 @@ const EnglishListenTypeLevel: React.FC<EnglishListenTypeLevelProps> = ({ difficu
         <GameEndScreen
             title={timeLeft > 0 ? "Complete!" : "Time's up!"}
             onReset={setupGame}
+            onGoToMenu={onGoToMenu}
             onReview={() => setIsReviewing(true)}
             showReviewButton={incorrectAttempts.length > 0}
         >

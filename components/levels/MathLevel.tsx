@@ -23,6 +23,7 @@ interface MathLevelProps {
   onCorrect: () => void;
   onStatusUpdate: (status: { timeLeft: number; currentQuestion: number; totalQuestions: number; }) => void;
   onGameEnd: () => void;
+  onGoToMenu: () => void;
 }
 
 type FeedbackStatus = 'correct' | 'incorrect' | null;
@@ -34,7 +35,7 @@ const TIME_LIMITS: Record<Difficulty, number> = {
     [Difficulty.HARD]: 90,
 };
 
-const MathLevel: React.FC<MathLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd }) => {
+const MathLevel: React.FC<MathLevelProps> = ({ difficulty, onCorrect, onStatusUpdate, onGameEnd, onGoToMenu }) => {
   const [problem, setProblem] = useState<Problem | null>(null);
   const [options, setOptions] = useState<number[]>([]);
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
@@ -143,6 +144,7 @@ const MathLevel: React.FC<MathLevelProps> = ({ difficulty, onCorrect, onStatusUp
       <GameEndScreen
         title={timeLeft > 0 ? "Hoàn thành!" : "Hết giờ!"}
         onReset={resetGame}
+        onGoToMenu={onGoToMenu}
         onReview={() => setIsReviewing(true)}
         showReviewButton={incorrectAttempts.length > 0}
       >

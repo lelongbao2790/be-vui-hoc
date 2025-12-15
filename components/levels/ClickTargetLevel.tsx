@@ -10,6 +10,7 @@ interface ClickTargetLevelProps {
   onCorrect: () => void;
   onGameEnd: () => void;
   onStatusUpdate: (status: { currentQuestion: number; totalQuestions: number; }) => void;
+  onGoToMenu: () => void;
 }
 
 interface IncorrectAttempt {
@@ -21,7 +22,7 @@ interface IncorrectAttempt {
 type FeedbackStatus = 'correct' | 'incorrect' | null;
 const TOTAL_QUESTIONS = 5;
 
-const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEnd, onStatusUpdate }) => {
+const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEnd, onStatusUpdate, onGoToMenu }) => {
   const [targets, setTargets] = useState<{ emoji: string; number: number }[]>([]);
   const [correctNumber, setCorrectNumber] = useState(0);
   const [feedback, setFeedback] = useState<FeedbackStatus>(null);
@@ -100,6 +101,7 @@ const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEn
         <GameEndScreen
             title="Hoàn thành!"
             onReset={resetGame}
+            onGoToMenu={onGoToMenu}
             onReview={() => setIsReviewing(true)}
             showReviewButton={incorrectAttempts.length > 0}
         >

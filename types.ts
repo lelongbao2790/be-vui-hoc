@@ -7,7 +7,17 @@ export enum Subject {
   TYPING = 'TYPING',
 }
 
+export enum PreschoolSubject {
+  COLORS = 'PRESCHOOL_COLORS',
+  ANIMALS = 'PRESCHOOL_ANIMALS',
+  OBJECTS = 'PRESCHOOL_OBJECTS',
+  SHAPES = 'PRESCHOOL_SHAPES',
+  COUNTING = 'PRESCHOOL_COUNTING',
+}
+
+
 export enum LevelType {
+  // Grade 1
   CLICK_BASIC = 'CLICK_BASIC',
   CLICK_TARGET = 'CLICK_TARGET',
   MATH_ADD_SUBTRACT = 'MATH_ADD_SUBTRACT',
@@ -20,6 +30,13 @@ export enum LevelType {
   ENGLISH_LISTEN_FILL_SENTENCE = 'ENGLISH_LISTEN_FILL_SENTENCE',
   TYPING_BASIC = 'TYPING_BASIC',
   TYPING_VIETNAMESE_VOWELS = 'TYPING_VIETNAMESE_VOWELS',
+  
+  // Preschool
+  PRESCHOOL_COLORS = 'PRESCHOOL_COLORS',
+  PRESCHOOL_ANIMALS = 'PRESCHOOL_ANIMALS',
+  PRESCHOOL_OBJECTS = 'PRESCHOOL_OBJECTS',
+  PRESCHOOL_SHAPES = 'PRESCHOOL_SHAPES',
+  PRESCHOOL_COUNTING = 'PRESCHOOL_COUNTING',
 }
 
 export enum Difficulty {
@@ -30,7 +47,7 @@ export enum Difficulty {
 
 export interface Level {
   type: LevelType;
-  subject: Subject;
+  subject: Subject | PreschoolSubject;
   title: string;
   description: string;
   difficulties: Difficulty[];
@@ -75,4 +92,22 @@ export interface VietnameseVowelRule {
   result: string;
   guide: string;
   description: string;
+}
+
+// ---- Preschool Types ----
+export interface PreschoolItem {
+  id: string;
+  name: string;
+  image: string; // emoji
+}
+
+export interface PreschoolColor {
+  id: string;
+  name: string;
+  hex: string;
+}
+
+export interface PreschoolShape {
+  id: string;
+  name: string;
 }
