@@ -233,9 +233,24 @@ const autoSelectMicrosoftAria = async () => {
     const desiredFullName = 'Microsoft Aria Online (Natural) - English (United States) (en-US)';
     let match = voicesList.find(v => (v.name || '') === desiredFullName);
 
-    // fallback: match by 'Aria' or 'Microsoft Aria' in the name and en language
+    // Prefer voices that include both 'Aria' and 'Natural' (strong match), then 'Natural', then 'Aria'
     if (!match) {
-      match = voicesList.find(v => /(aria|microsoft aria)/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
+      match = voicesList.find(v => /(aria).*natural|natural.*(aria)/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
+    }
+
+    // Next prefer any voice with 'Natural' in the name and English language
+    if (!match) {
+      match = voicesList.find(v => /natural/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
+    }
+
+    // Next prefer any voice with 'Aria' in the name and English language
+    if (!match) {
+      match = voicesList.find(v => /aria/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
+    }
+
+    // Fallback to Microsoft voices in English
+    if (!match) {
+      match = voicesList.find(v => /microsoft/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
     }
 
     if (match) {
