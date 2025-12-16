@@ -7,6 +7,7 @@ import { BookIcon } from './icons/BookIcon';
 import { EnglishIcon } from './icons/EnglishIcon';
 import { TrophyIcon } from './icons/TrophyIcon';
 import { TypingIcon } from './icons/TypingIcon';
+import { SELECTORS, testIdFor } from '../utils/testIds';
 
 interface SubjectSelectorProps {
   onSelectSubject: (subject: Subject) => void;
@@ -23,13 +24,15 @@ const subjects = [
 
 const SubjectSelector: React.FC<SubjectSelectorProps> = ({ onSelectSubject, highScores }) => {
   return (
-    <div className="text-center">
+    <div id={SELECTORS.SUBJECT.ROOT} data-testid={testIdFor('subject-selector','root')} className="text-center">
       <h2 className="text-3xl font-bold mb-2 text-slate-700">Chọn một môn học!</h2>
       <p className="text-lg mb-8 text-slate-500">Bé muốn chơi trò gì hôm nay?</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
         {subjects.map(({ type, label, color, icon }) => (
           <button
             key={type}
+            id={SELECTORS.SUBJECT.BUTTON(type)}
+            data-testid={testIdFor('subject-selector',String(type))}
             onClick={() => onSelectSubject(type)}
             className={`flex flex-col items-center justify-between p-6 bg-gradient-to-br ${color} text-white rounded-2xl shadow-lg transform hover:-translate-y-2 transition-transform duration-300 ease-in-out border-4 border-white/50 focus:outline-none focus:ring-4 focus:ring-yellow-300 min-h-[240px]`}
           >

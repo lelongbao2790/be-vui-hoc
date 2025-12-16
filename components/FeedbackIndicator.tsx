@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { testIdFor } from '../utils/testIds';
 
 type FeedbackStatus = 'correct' | 'incorrect' | null;
 
@@ -31,8 +32,8 @@ const FeedbackIndicator: React.FC<FeedbackIndicatorProps> = ({ status }) => {
   };
 
   return (
-    <div className={`absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-      <div className={`flex items-center gap-4 p-6 rounded-2xl text-white font-bold text-4xl shadow-2xl animate-bounce ${config.bgColor} border-4 ${config.borderColor}`}>
+    <div data-testid={testIdFor('feedback','overlay')} className={`absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+      <div data-testid={testIdFor('feedback','box')} className={`flex items-center gap-4 p-6 rounded-2xl text-white font-bold text-4xl shadow-2xl animate-bounce ${config.bgColor} border-4 ${config.borderColor}`}>
         <span>{config.icon}</span>
         <span>{config.text}</span>
       </div>
