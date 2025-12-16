@@ -51,60 +51,204 @@ export const playIncorrectSound = () => {
 // --- Speech Synthesis Logic using the browser's Web Speech API ---
 
 let voices: SpeechSynthesisVoice[] = [];
+let voicesReady = false;
+const voiceWaiters: Array<(v: SpeechSynthesisVoice[]) => void> = [];
 
 const loadVoices = () => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    const availableVoices = window.speechSynthesis.getVoices();
-    if (availableVoices.length > 0) {
-        voices = availableVoices;
-        logger.log("Speech synthesis voices loaded.", voices.map(v => `${v.name} (${v.lang})`));
-    }
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  const availableVoices = window.speechSynthesis.getVoices() || [];
+  if (availableVoices.length > 0) {
+    voices = availableVoices;
+    voicesReady = true;
+    logger.log('Speech synthesis voices loaded.', voices.map(v => `${v.name} (${v.lang})`));
+    // notify waiters
+    while (voiceWaiters.length) voiceWaiters.shift()!(voices);
+  }
 };
 
 // Load voices initially and on change
 if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-    loadVoices();
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
+  loadVoices();
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
 }
+
+const waitForVoices = (): Promise<SpeechSynthesisVoice[]> => {
+  return new Promise((resolve) => {
+    if (voicesReady) return resolve(voices);
+    voiceWaiters.push(resolve);
+    // safety timeout: resolve with whatever is available after 2s
+    setTimeout(() => resolve(window.speechSynthesis.getVoices() || []), 2000);
+  });
+};
+
+/**
+ * Pick the best voice for the requested language, preferring local/system voices.
+ */
+const pickVoiceForLang = (availableVoices: SpeechSynthesisVoice[], lang: 'vi' | 'en') => {
+  const target = lang === 'vi' ? 'vi' : 'en';
+  const lowerTarget = target.toLowerCase();
+
+  // Exact language code match first (e.g., 'vi-VN' or 'en-US')
+  let candidates = availableVoices.filter(v => (v.lang || '').toLowerCase() === (lang === 'vi' ? 'vi-vn' : 'en-us'));
+  if (candidates.length === 0) {
+    // startsWith match (e.g., 'vi', 'vi-VN', 'en')
+    candidates = availableVoices.filter(v => (v.lang || '').toLowerCase().startsWith(lowerTarget));
+  }
+  if (candidates.length === 0 && lang === 'vi') {
+    // name hints (some browsers use names, e.g., 'Google Việt Nam')
+    candidates = availableVoices.filter(v => /viet|vietnam/i.test(v.name || ''));
+  }
+  if (candidates.length === 0) {
+    // as last resort, pick default or any voice
+    candidates = availableVoices;
+  }
+
+  // prefer localService > default > vendor-name hints
+  const vendorHints = /(google|microsoft|amazon|siri|samantha|susan|amy|alloy|voice|british|uk|us)/i;
+  candidates.sort((a, b) => {
+    const score = (v: SpeechSynthesisVoice) => {
+      let s = 0;
+      if (v.localService) s += 4;
+      if (v.default) s += 2;
+      if (vendorHints.test(v.name || '')) s += 1;
+      return s;
+    };
+    return score(b) - score(a);
+  });
+
+  return candidates[0];
+};
 
 /**
  * Speaks text using the browser's built-in Web Speech API.
- * This works offline and is more reliable than external APIs.
+ * This will prefer a Vietnamese system voice when lang='vi' and falls back gracefully.
  * @param text The text to speak.
  * @param lang The language ('vi' for Vietnamese, 'en' for English).
+ * @param options Optional settings: rate, pitch, volume, preferredVoiceName.
  */
-export const speakText = (text: string, lang: 'vi' | 'en' = 'en') => {
+export const speakText = async (text: string, lang: 'vi' | 'en' = 'en', options?: { rate?: number; pitch?: number; volume?: number; preferredVoiceName?: string; persist?: boolean }) => {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      logger.warn("Speech Synthesis not supported.");
-      return;
+    logger.warn('Speech Synthesis not supported.');
+    return;
   }
 
   try {
-      const utterance = new SpeechSynthesisUtterance(text);
-      const langCode = lang === 'vi' ? 'vi-VN' : 'en-US';
-      utterance.lang = langCode;
-      utterance.rate = 0.9;
+    const availableVoices = await waitForVoices();
 
-      window.speechSynthesis.cancel(); // Stop any currently playing speech
+    const utterance = new SpeechSynthesisUtterance(text);
+    const langCode = lang === 'vi' ? 'vi-VN' : 'en-US';
+    utterance.lang = langCode;
 
-      // Find a voice that matches the language code (e.g., 'en-US') or the base language (e.g., 'en')
-      const desiredVoice = voices.find(voice => voice.lang === langCode) || voices.find(voice => voice.lang.startsWith(lang));
-      
-      if (desiredVoice) {
-          utterance.voice = desiredVoice;
-          logger.log(`Using voice: ${desiredVoice.name} (${desiredVoice.lang}) for speech.`);
-      } else {
-          logger.warn(`No specific voice found for language: ${lang}. Using browser default.`);
+    // tuned defaults: English should be normal speed and slightly stronger/pitched for clarity
+    // Use normal speaking rate and a slightly higher pitch for better audibility and naturalness
+    const defaultRate = lang === 'vi' ? 0.95 : 1.0;
+    const defaultPitch = lang === 'vi' ? 1.0 : 1.1;
+    const defaultVolume = 1.0;
+
+    utterance.rate = options?.rate ?? defaultRate;
+    utterance.pitch = options?.pitch ?? defaultPitch;
+    // Type on SpeechSynthesisUtterance includes volume in libs; set defensively
+    (utterance as any).volume = options?.volume ?? defaultVolume;
+
+    window.speechSynthesis.cancel(); // Stop any currently playing speech
+
+    let chosenVoice: SpeechSynthesisVoice | undefined;
+    // Determine preferred voice (explicit option overrides saved preference)
+    const preferredName = options?.preferredVoiceName ?? getPreferredVoiceName(lang);
+    if (preferredName) {
+      // try exact match, then case-insensitive, then substring
+      chosenVoice = availableVoices.find(v => (v.name || '') === preferredName)
+        || availableVoices.find(v => (v.name || '').toLowerCase() === preferredName.toLowerCase())
+        || availableVoices.find(v => (v.name || '').toLowerCase().includes(preferredName.toLowerCase()));
+
+      // if still not found, try to extract language code in parentheses e.g., (en-US)
+      if (!chosenVoice) {
+        const parenMatch = /\(([^)]+)\)$/.exec(preferredName);
+        if (parenMatch) {
+          const code = parenMatch[1];
+          chosenVoice = availableVoices.find(v => (v.lang || '').toLowerCase() === code.toLowerCase());
+        }
       }
-      
-      window.speechSynthesis.speak(utterance);
-      logger.log(`Requested speech for: "${text}"`);
+
+      // persist if requested explicitly
+      if (chosenVoice && options?.preferredVoiceName && options?.persist) {
+        setPreferredVoiceName(lang, options.preferredVoiceName);
+      }
+    }
+
+    if (!chosenVoice) {
+      chosenVoice = pickVoiceForLang(availableVoices, lang);
+    }
+
+    if (chosenVoice) {
+      utterance.voice = chosenVoice;
+      logger.log(`Using voice: ${chosenVoice.name} (${chosenVoice.lang}) for ${lang} speech.`);
+    } else {
+      logger.warn(`No voices available; using browser default for ${lang}.`);
+    }
+
+    window.speechSynthesis.speak(utterance);
+    logger.log(`Requested speech for: "${text}" (rate=${utterance.rate}, pitch=${utterance.pitch}, volume=${(utterance as any).volume})`);
   } catch (e) {
-      logger.error("Speech synthesis failed.", e);
+    logger.error('Speech synthesis failed.', e);
   }
 };
+
+/**
+ * Utility to get list of available speech voices (may be empty until voices load).
+ */
+export const getAvailableVoices = (): SpeechSynthesisVoice[] => voices.slice();
+
+/** Persist a user's preferred voice name for a given language (stored in localStorage) */
+export const setPreferredVoiceName = (lang: 'vi' | 'en', name: string) => {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    window.localStorage.setItem(`preferredVoiceName.${lang}`, name);
+    logger.log(`Saved preferred voice for ${lang}: ${name}`);
+  } catch (e) {
+    logger.warn('Failed to save preferred voice name to localStorage', e);
+  }
+};
+
+export const getPreferredVoiceName = (lang: 'vi' | 'en'): string | undefined => {
+  if (typeof window === 'undefined' || !window.localStorage) return undefined;
+  try {
+    return window.localStorage.getItem(`preferredVoiceName.${lang}`) ?? undefined;
+  } catch (e) {
+    logger.warn('Failed to read preferred voice name from localStorage', e);
+    return undefined;
+  }
+};
+
+// Auto-select Microsoft Aria (Natural) English voice as default if available and no user preference
+const autoSelectMicrosoftAria = async () => {
+  try {
+    // Don't override an explicit user preference
+    if (getPreferredVoiceName('en')) return;
+    const voicesList = await waitForVoices();
+    if (!voicesList || voicesList.length === 0) return;
+
+    const desiredFullName = 'Microsoft Aria Online (Natural) - English (United States) (en-US)';
+    let match = voicesList.find(v => (v.name || '') === desiredFullName);
+
+    // fallback: match by 'Aria' or 'Microsoft Aria' in the name and en language
+    if (!match) {
+      match = voicesList.find(v => /(aria|microsoft aria)/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
+    }
+
+    if (match) {
+      setPreferredVoiceName('en', match.name);
+      logger.log(`Auto-selected preferred English voice: ${match.name}`);
+    }
+  } catch (e) {
+    logger.warn('Auto-select Microsoft Aria voice failed', e);
+  }
+};
+
+// Try auto-selection after we have voice list (non-blocking)
+autoSelectMicrosoftAria();
 
 
 // --- Pre-rendered Audio Logic for static phrases ---
