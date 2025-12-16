@@ -3,6 +3,7 @@ import React from 'react';
 import type { Level, Difficulty } from '../types';
 import { Difficulty as DifficultyEnum } from '../types';
 import { LevelType } from '../types';
+import { SELECTORS, testIdFor } from '../utils/testIds';
 
 interface DifficultySelectorProps {
   level: Level;
@@ -63,7 +64,7 @@ const getLabel = (levelType: LevelType, difficulty: Difficulty): string => {
 
 const DifficultySelector: React.FC<DifficultySelectorProps> = ({ level, onSelectDifficulty }) => {
   return (
-    <div className="text-center">
+    <div id={SELECTORS.DIFFICULTY.ROOT} data-testid={testIdFor('difficulty-selector','root')} className="text-center">
       <h2 className="text-3xl font-bold mb-2 text-slate-700">Chọn độ khó cho</h2>
       <p className="text-2xl font-bold mb-8 text-sky-600">{level.title}</p>
       
@@ -71,6 +72,8 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({ level, onSelect
         {level.difficulties.map((difficulty) => (
           <button
             key={difficulty}
+            id={SELECTORS.DIFFICULTY.BUTTON(difficulty)}
+            data-testid={testIdFor('difficulty-selector',String(difficulty))}
             onClick={() => onSelectDifficulty(difficulty)}
             className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-10 text-2xl rounded-full shadow-lg transition-transform transform hover:scale-105 w-64"
           >

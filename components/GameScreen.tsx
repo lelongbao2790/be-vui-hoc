@@ -16,6 +16,7 @@ import TypingBasicLevel from './levels/TypingBasicLevel';
 import TypingVietnameseVowelsLevel from './levels/TypingVietnameseVowelsLevel';
 import PreschoolGameLevel from './levels/preschool/PreschoolGameLevel';
 import { HomeIcon } from './icons/HomeIcon';
+import { SELECTORS, testIdFor } from '../utils/testIds';
 
 interface GameScreenProps {
   level: Level;
@@ -87,7 +88,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ level, difficulty, onGoHome, on
   const showTypingStatus = gameStatus && (typeof gameStatus.cpm === 'number' || typeof gameStatus.accuracy === 'number');
 
   return (
-    <div>
+    <div id={SELECTORS.GAME.ROOT} data-testid={testIdFor('game-screen','root')}>
       <div className="mb-4">
         <div className="flex justify-between items-start">
             <div>
@@ -95,6 +96,8 @@ const GameScreen: React.FC<GameScreenProps> = ({ level, difficulty, onGoHome, on
                 <p className="text-slate-500">{level.description}</p>
             </div>
             <button
+                id={SELECTORS.GAME.GO_HOME}
+                data-testid={testIdFor('game-screen','go-home')}
                 onClick={onGoHome}
                 className="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-3 rounded-full shadow-lg transition-transform transform hover:scale-110 flex-shrink-0"
                 aria-label="Về trang chủ"
