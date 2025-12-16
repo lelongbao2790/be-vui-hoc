@@ -1,0 +1,7 @@
+[
+  { "id": "circle", "name": "Hình Tròn" },
+  { "id": "square", "name": "Hình Vuông" },
+  { "id": "triangle", "name": "Hình Tam Giác" },
+  { "id": "star", "name": "Hình Ngôi Sao" },
+  { "id": "heart", "name": "Hình Trái Tim" }
+]
