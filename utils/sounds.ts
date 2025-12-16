@@ -1,4 +1,5 @@
 import { logger } from "./logger";
+import { setPreference, getPreference } from './storage';
 
 let audioContext: AudioContext | null = null;
 
@@ -143,8 +144,8 @@ export const speakText = async (text: string, lang: 'vi' | 'en' = 'en', options?
 
     // tuned defaults: English should be normal speed and slightly stronger/pitched for clarity
     // Use normal speaking rate and a slightly higher pitch for better audibility and naturalness
-    const defaultRate = lang === 'vi' ? 0.95 : 1.0;
-    const defaultPitch = lang === 'vi' ? 1.0 : 1.1;
+    const defaultRate = 0.95;
+    const defaultPitch = 0.9
     const defaultVolume = 1.0;
 
     utterance.rate = options?.rate ?? defaultRate;
@@ -201,54 +202,173 @@ export const speakText = async (text: string, lang: 'vi' | 'en' = 'en', options?
  */
 export const getAvailableVoices = (): SpeechSynthesisVoice[] => voices.slice();
 
-/** Persist a user's preferred voice name for a given language (stored in localStorage) */
+/** Persist a user's preferred voice name for a given language (stored via storage helpers) */
 export const setPreferredVoiceName = (lang: 'vi' | 'en', name: string) => {
-  if (typeof window === 'undefined' || !window.localStorage) return;
   try {
-    window.localStorage.setItem(`preferredVoiceName.${lang}`, name);
+    setPreference(`preferredVoiceName.${lang}`, name);
     logger.log(`Saved preferred voice for ${lang}: ${name}`);
   } catch (e) {
-    logger.warn('Failed to save preferred voice name to localStorage', e);
+    logger.warn('Failed to save preferred voice name', e);
   }
 };
 
 export const getPreferredVoiceName = (lang: 'vi' | 'en'): string | undefined => {
-  if (typeof window === 'undefined' || !window.localStorage) return undefined;
   try {
-    return window.localStorage.getItem(`preferredVoiceName.${lang}`) ?? undefined;
+    return getPreference(`preferredVoiceName.${lang}`) ?? undefined;
   } catch (e) {
-    logger.warn('Failed to read preferred voice name from localStorage', e);
+    logger.warn('Failed to read preferred voice name', e);
     return undefined;
   }
 };
 
-// Auto-select Microsoft Aria (Natural) English voice as default if available and no user preference
-const autoSelectMicrosoftAria = async () => {
+// Auto-select natural-sounding voices for English and Vietnamese when available (and no user preference)
+const autoSelectNaturalVoices = async () => {
   try {
-    // Don't override an explicit user preference
-    if (getPreferredVoiceName('en')) return;
     const voicesList = await waitForVoices();
     if (!voicesList || voicesList.length === 0) return;
 
-    const desiredFullName = 'Microsoft Aria Online (Natural) - English (United States) (en-US)';
-    let match = voicesList.find(v => (v.name || '') === desiredFullName);
+    const langs: Array<'en' | 'vi'> = ['en', 'vi'];
+    for (const lang of langs) {
+      // Don't override an explicit user preference
+      if (getPreferredVoiceName(lang)) continue;
 
-    // fallback: match by 'Aria' or 'Microsoft Aria' in the name and en language
-    if (!match) {
-      match = voicesList.find(v => /(aria|microsoft aria)/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
-    }
+      let match: SpeechSynthesisVoice | undefined;
 
-    if (match) {
-      setPreferredVoiceName('en', match.name);
-      logger.log(`Auto-selected preferred English voice: ${match.name}`);
+      if (lang === 'en') {
+        const desiredFullName = 'Microsoft Aria Online (Natural) - English (United States) (en-US)';
+        // Exact match first
+        match = voicesList.find(v => (v.name || '') === desiredFullName);
+
+        // Prefer voices that include both 'Aria' and 'Natural'
+        if (!match) {
+          match = voicesList.find(v => /(aria).*natural|natural.*(aria)/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
+        }
+
+        // Next prefer any voice with 'Natural' in the name and English language
+        if (!match) {
+          match = voicesList.find(v => /natural/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
+        }
+
+        // Next prefer Google US English if available
+        if (!match) {
+          match = voicesList.find(v => (/google/i.test(v.name || '') && /us|u\.s\.?|united states|en-us|en_us/i.test((v.name || '') + ' ' + (v.lang || ''))) && (v.lang || '').toLowerCase().startsWith('en'));
+        }
+
+        // Next prefer any voice with 'Aria' in the name and English language
+        if (!match) {
+          match = voicesList.find(v => /aria/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
+        }
+
+        // Fallback to Microsoft voices in English
+        if (!match) {
+          match = voicesList.find(v => /microsoft/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
+        }
+      } else {
+        // Vietnamese: prefer natural-sounding voices, then vendor-specific names
+        // First try voices with 'Natural' and Vietnamese language
+        match = voicesList.find(v => /natural/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('vi'));
+
+        // Then prefer names with 'Viet' or 'Vietnam' in them
+        if (!match) {
+          match = voicesList.find(v => /viet|vietnam/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('vi'));
+        }
+
+        // Then prefer Google Vietnamese if available
+        if (!match) {
+          match = voicesList.find(v => /google/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('vi'));
+        }
+
+        // Then prefer Microsoft Vietnamese voices
+        if (!match) {
+          match = voicesList.find(v => /microsoft/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('vi'));
+        }
+
+        // As a last resort, any voice whose lang starts with 'vi'
+        if (!match) {
+          match = voicesList.find(v => (v.lang || '').toLowerCase().startsWith('vi'));
+        }
+      }
+
+      if (match) {
+        setPreferredVoiceName(lang, match.name);
+        logger.log(`Auto-selected preferred ${lang} voice: ${match.name}`);
+      }
     }
   } catch (e) {
-    logger.warn('Auto-select Microsoft Aria voice failed', e);
+    logger.warn('Auto-select natural voice failed', e);
   }
 };
 
 // Try auto-selection after we have voice list (non-blocking)
-autoSelectMicrosoftAria();
+autoSelectNaturalVoices();
+
+// --- Speech priming for mobile (iOS/Safari) ---
+// On iOS, voices may not be available until a user gesture triggers speech synthesis.
+let speechPrimed = false;
+
+const primeSpeech = async () => {
+  if (speechPrimed || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  try {
+    // Ensure audio context is resumed on user gesture (unlocks audio on iOS)
+    const ctx = getAudioContext();
+    if (ctx && ctx.state === 'suspended' && typeof ctx.resume === 'function') {
+      try { await ctx.resume(); } catch (e) { logger.warn('AudioContext resume failed during priming', e); }
+    }
+
+    // Force-get voices and attempt tiny, near-silent utterances in both languages
+    window.speechSynthesis.getVoices();
+
+    // Short helper to speak a minimal utterance quietly
+    const speakQuiet = (langCode: string, text = '.') => new Promise<void>((resolve) => {
+      try {
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = langCode;
+        // very low volume to avoid audible noise
+        try { (u as any).volume = 0.01; } catch (e) { /* ignore */ }
+        u.rate = 1.0;
+        u.onend = () => { resolve(); };
+        u.onerror = () => { resolve(); };
+        window.speechSynthesis.speak(u);
+      } catch (e) {
+        // If speaking fails (CORS or browser block), resolve quickly
+        resolve();
+      }
+    });
+
+    // Speak English then Vietnamese to initialize both
+    await speakQuiet('en-US', '.');
+    await speakQuiet('vi-VN', '.');
+
+    // After priming, reload voices
+    loadVoices();
+    speechPrimed = true;
+    logger.log('Speech primed by user gesture; voices refreshed');
+  } catch (e) {
+    speechPrimed = true;
+    logger.warn('Speech priming encountered an error', e);
+  }
+};
+
+// Attach a one-time user gesture listener to prime speech (non-blocking)
+const attachGesturePrimers = () => {
+  if (typeof window === 'undefined') return;
+  const handler = () => {
+    primeSpeech();
+    window.removeEventListener('click', handler);
+    window.removeEventListener('touchstart', handler);
+    window.removeEventListener('keydown', handler);
+  };
+  window.addEventListener('click', handler, { once: true, passive: true });
+  window.addEventListener('touchstart', handler, { once: true, passive: true });
+  window.addEventListener('keydown', handler, { once: true, passive: true });
+};
+
+attachGesturePrimers();
+
+// Allow manual priming when needed
+export const requestSpeechPriming = () => {
+  primeSpeech();
+};
 
 
 // --- Pre-rendered Audio Logic for static phrases ---

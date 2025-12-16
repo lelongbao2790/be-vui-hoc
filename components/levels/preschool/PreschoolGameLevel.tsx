@@ -125,7 +125,7 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
         const correctAnswer = selectedItems[0];
         
         newChallenge = {
-            prompt: `Bé hãy tìm ${correctAnswer.name}`,
+            prompt: `tìm ${correctAnswer.name}`,
             correctAnswer: correctAnswer,
             options: shuffleArray(selectedItems)
         };
