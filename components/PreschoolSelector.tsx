@@ -24,7 +24,7 @@ const PreschoolSelector: React.FC<PreschoolSelectorProps> = ({ onSelectLevel }) 
   return (
     <div className="text-center">
       <h2 className="text-3xl font-bold mb-2 text-slate-700">Cùng chơi và học nào!</h2>
-      <p className="text-lg mb-8 text-slate-500">Bé hãy chọn một trò chơi bên dưới nhé.</p>
+      <p className="text-lg mb-8 text-slate-500">chọn một trò chơi bên dưới nhé.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         {PRESCHOOL_LEVELS.map((level) => (
           <button
