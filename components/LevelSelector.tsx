@@ -21,6 +21,7 @@ import { PawIcon } from './icons/PawIcon';
 import { BlocksIcon } from './icons/BlocksIcon';
 import { ShapesIcon } from './icons/ShapesIcon';
 import { NumbersIcon } from './icons/NumbersIcon';
+import { SELECTORS, testIdFor } from '../utils/testIds';
 
 interface LevelSelectorProps {
   subject: Subject;
@@ -60,7 +61,7 @@ const LevelSelector: React.FC<LevelSelectorProps> = ({ subject, onSelectLevel })
   const subjectLevels = LEVELS.filter(level => level.subject === subject);
   
   return (
-    <div className="text-center">
+    <div id={SELECTORS.LEVEL.ROOT} data-testid={testIdFor('level-selector','root')} className="text-center">
       <h2 className="text-3xl font-bold mb-2 text-slate-700">Chọn một trò chơi!</h2>
       <p className="text-lg mb-8 text-slate-500">Hãy cùng thử sức nào bé ơi!</p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -71,6 +72,8 @@ const LevelSelector: React.FC<LevelSelectorProps> = ({ subject, onSelectLevel })
           return (
             <button
               key={level.type}
+              id={SELECTORS.LEVEL.BUTTON(level.type)}
+              data-testid={testIdFor('level-selector',String(level.type))}
               onClick={() => onSelectLevel(level)}
               className={`flex flex-col items-center justify-center p-6 bg-gradient-to-br ${colorClass} text-white rounded-2xl shadow-lg transform hover:-translate-y-2 transition-transform duration-300 ease-in-out border-4 border-white/50 focus:outline-none focus:ring-4 focus:ring-yellow-300 min-h-[200px]`}
             >

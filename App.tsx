@@ -10,6 +10,7 @@ import { StarIcon } from './components/icons/StarIcon';
 import { BackIcon } from './components/icons/BackIcon';
 import { loadHighScores, saveHighScores } from './utils/storage';
 import { logger } from './utils/logger';
+import { APP, testIdFor } from './utils/testIds';
 
 type GameState = 'selecting_subject' | 'selecting_level' | 'selecting_difficulty' | 'playing';
 type AgeGroup = 'preschool' | 'grade1';
@@ -157,21 +158,21 @@ const App: React.FC = () => {
   const showBackButton = selectedAgeGroup && (gameState !== 'playing');
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-cyan-200 to-blue-300 text-slate-800">
-      <div className="w-full max-w-4xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl shadow-2xl p-6 md:p-8 border-4 border-white">
+    <div id={APP.ROOT} data-testid={testIdFor('app','root')} className="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-gradient-to-br from-cyan-200 to-blue-300 text-slate-800">
+      <div id={APP.MAIN} data-testid={testIdFor('app','main')} className="w-full max-w-4xl mx-auto bg-white/70 backdrop-blur-sm rounded-2xl shadow-2xl p-6 md:p-8 border-4 border-white">
         <header className="flex justify-between items-center mb-6 pb-4 border-b-4 border-dashed border-sky-300">
           <div className="flex items-center gap-4">
             {showBackButton && (
-              <button onClick={handleBack} className="bg-white/50 hover:bg-white/80 text-sky-600 p-3 rounded-full shadow-md transition-colors">
+              <button id={APP.HEADER_BACK} data-testid={testIdFor('app','header-back')} onClick={handleBack} className="bg-white/50 hover:bg-white/80 text-sky-600 p-3 rounded-full shadow-md transition-colors">
                 <BackIcon className="w-6 h-6" />
               </button>
             )}
-            <h1 className="text-3xl md:text-5xl font-bold text-sky-600 drop-shadow-md">
+            <h1 id={APP.TITLE} data-testid={testIdFor('app','title')} className="text-3xl md:text-5xl font-bold text-sky-600 drop-shadow-md">
               Bé Vui Học
             </h1>
           </div>
           {gameState === 'playing' && (
-            <div className="flex items-center gap-2 bg-amber-300 text-amber-800 font-bold px-4 py-2 rounded-full shadow-lg border-2 border-amber-400">
+            <div id={APP.SCORE} data-testid={testIdFor('app','score')} className="flex items-center gap-2 bg-amber-300 text-amber-800 font-bold px-4 py-2 rounded-full shadow-lg border-2 border-amber-400">
               <StarIcon className="w-8 h-8"/>
               <span className="text-2xl">{score}</span>
             </div>
@@ -182,7 +183,7 @@ const App: React.FC = () => {
           {renderContent()}
         </main>
       </div>
-       <footer className="mt-6 text-center text-sky-700">
+       <footer id={APP.FOOTER} data-testid={testIdFor('app','footer')} className="mt-6 text-center text-sky-700">
         <p>Tạo bởi AI với tình yêu dành cho các bé ❤️</p>
         <p className="text-sm opacity-75">Phiên bản {APP_VERSION}</p>
       </footer>
