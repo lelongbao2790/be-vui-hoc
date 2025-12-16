@@ -248,6 +248,11 @@ const autoSelectMicrosoftAria = async () => {
       match = voicesList.find(v => /aria/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
     }
 
+    // Next prefer Google US English if available (common name: 'Google US English' or similar)
+    if (!match) {
+      match = voicesList.find(v => (/google/i.test(v.name || '') && /us|u\.s\.?|united states|en-us|en_us|en-us/i.test((v.name || '') + ' ' + (v.lang || ''))) && (v.lang || '').toLowerCase().startsWith('en'));
+    }
+
     // Fallback to Microsoft voices in English
     if (!match) {
       match = voicesList.find(v => /microsoft/i.test(v.name || '') && (v.lang || '').toLowerCase().startsWith('en'));
