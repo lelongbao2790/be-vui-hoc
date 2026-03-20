@@ -144,7 +144,7 @@ export const speakText = async (text: string, lang: 'vi' | 'en' = 'en', options?
 
     // tuned defaults: English should be normal speed and slightly stronger/pitched for clarity
     // Use normal speaking rate and a slightly higher pitch for better audibility and naturalness
-    const defaultRate = 0.95;
+    const defaultRate = 0.6;
     const defaultPitch = 0.9
     const defaultVolume = 1.0;
 
