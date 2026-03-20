@@ -36,9 +36,16 @@ const ClickBasicLevel: React.FC<ClickBasicLevelProps> = ({ difficulty, onCorrect
     onStatusUpdate({ score, timeLeft });
   }, [score, timeLeft, onStatusUpdate]);
 
+  // Reserve 100px at the top for SpeechText
   const moveTarget = useCallback(() => {
-    const newTop = `${Math.floor(Math.random() * 85) + 5}%`;
-    const newLeft = `${Math.floor(Math.random() * 85) + 5}%`;
+    const minTopPx = 120; // px, below SpeechText
+    const maxTopPx = 400; // px, for min game area height
+    const minLeftPct = 5;
+    const maxLeftPct = 85;
+    // Calculate top as px, left as %
+    const newTopPx = Math.floor(Math.random() * (maxTopPx - minTopPx)) + minTopPx;
+    const newTop = `${newTopPx}px`;
+    const newLeft = `${Math.floor(Math.random() * (maxLeftPct - minLeftPct)) + minLeftPct}%`;
     setPosition({ top: newTop, left: newLeft });
     setEmoji(CLICK_EMOJIS[Math.floor(Math.random() * CLICK_EMOJIS.length)]);
     setKey(prev => prev + 1);
@@ -94,20 +101,27 @@ const ClickBasicLevel: React.FC<ClickBasicLevelProps> = ({ difficulty, onCorrect
 
   return (
     <div className="w-full min-h-[400px] relative flex flex-col items-center justify-center">
-      <SpeechText
-        text="Hãy click vào mục tiêu thật nhanh nhé!"
-        lang="vi"
-        className="mb-4"
-      />
-      <button
-        key={key}
-        onClick={handleClick}
-        className="absolute text-7xl md:text-8xl transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-in-out hover:scale-110 animate-pulse"
-        style={{ top: position.top, left: position.left }}
-        aria-label="Click me"
-      >
-        {emoji}
-      </button>
+      {/* Reserve space for SpeechText at the top */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-full max-w-md px-4 pointer-events-none" style={{ height: 100 }}>
+        <SpeechText
+          text="Hãy click vào mục tiêu thật nhanh nhé!"
+          lang="vi"
+          className="mb-2 pointer-events-auto"
+        />
+      </div>
+      {/* Spacer to push game area below SpeechText */}
+      <div style={{ height: 100 }} />
+      <div className="w-full h-full flex-1 flex items-center justify-center">
+        <button
+          key={key}
+          onClick={handleClick}
+          className="absolute text-7xl md:text-8xl transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-in-out hover:scale-110 animate-pulse"
+          style={{ top: position.top, left: position.left }}
+          aria-label="Click me"
+        >
+          {emoji}
+        </button>
+      </div>
     </div>
   );
 };
