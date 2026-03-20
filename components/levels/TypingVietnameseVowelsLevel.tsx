@@ -4,6 +4,7 @@ import { playCorrectSound } from '../../utils/sounds';
 import { logger } from '../../utils/logger';
 import type { Difficulty, VietnameseVowelRule } from '../../types';
 import FeedbackIndicator from '../FeedbackIndicator';
+import SpeechText from '../SpeechText';
 
 interface TypingVietnameseVowelsLevelProps {
   difficulty: Difficulty;
@@ -80,7 +81,14 @@ const TypingVietnameseVowelsLevel: React.FC<TypingVietnameseVowelsLevelProps> = 
 
         {/* Main Game Panel */}
         <div className="w-full md:w-2/3 flex flex-col items-center text-center">
-            <p className="text-3xl font-semibold mb-2">{currentRule.description}</p>
+            {/* Rule description with TTS */}
+            {currentRule && (
+              <SpeechText
+                text={currentRule.description}
+                lang="vi"
+                className="mb-2"
+              />
+            )}
             <p className="text-4xl mb-4">Bây giờ hãy gõ:</p>
             
             <div className="text-9xl font-bold text-sky-600 mb-6 drop-shadow-md">

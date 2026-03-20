@@ -3,6 +3,7 @@ import { getVietnameseWords } from '../../utils/dataLoader';
 import type { VietnameseWord } from '../../types';
 import { playCorrectSound, playEncouragementSound } from '../../utils/sounds';
 import FeedbackIndicator from '../FeedbackIndicator';
+import SpeechText from '../SpeechText';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import GameEndScreen from '../GameEndScreen';
 import ReviewMistakesScreen from '../ReviewMistakesScreen';
@@ -164,6 +165,14 @@ const VietnameseFillWordLevel: React.FC<VietnameseFillWordLevelProps> = ({ onCor
   return (
     <div className="w-full flex flex-col items-center justify-center relative">
         <div className="text-9xl mb-6 h-40 flex items-center justify-center">{currentWord.image}</div>
+        {/* Question sentence with TTS */}
+        {currentWord && (
+          <SpeechText
+            text={currentWord.sentence.replace('__', '...')}
+            lang="vi"
+            className="mb-4"
+          />
+        )}
         <form onSubmit={handleSubmit} className="flex flex-col items-center">
             <div className="flex items-center gap-2 bg-white p-4 rounded-2xl border-4 border-rose-300">
                 <span className="text-4xl md:text-5xl font-bold">{sentenceParts[0]}</span>
