@@ -5,6 +5,7 @@ import { TARGET_EMOJIS } from '../../constants';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import GameEndScreen from '../GameEndScreen';
 import ReviewMistakesScreen from '../ReviewMistakesScreen';
+import SpeechText from '../SpeechText';
 
 interface ClickTargetLevelProps {
   onCorrect: () => void;
@@ -113,22 +114,24 @@ const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEn
 
   return (
     <div className="w-full flex flex-col items-center justify-center relative">
-        <h3 className="text-3xl md:text-4xl font-bold mb-8 p-4 bg-yellow-200 border-4 border-yellow-400 rounded-xl shadow-md">
-            Click vào con vật có số <span className="text-red-500">{correctNumber}</span>
-        </h3>
-        <div className="flex flex-wrap justify-center gap-4 md:gap-8">
-            {targets.map(({ emoji, number }) => (
-                <button
-                    key={number}
-                    onClick={() => handleClick(number)}
-                    className="flex flex-col items-center justify-center w-28 h-28 md:w-36 md:h-36 bg-white rounded-2xl shadow-lg transform hover:scale-110 transition-transform duration-200 border-4 border-sky-300"
-                >
-                    <span className="text-5xl md:text-6xl">{emoji}</span>
-                    <span className="text-2xl md:text-3xl font-bold mt-2">{number}</span>
-                </button>
-            ))}
-        </div>
-        <FeedbackIndicator status={feedback} />
+      <SpeechText
+        text={`Click vào con vật có số ${correctNumber}`}
+        lang="vi"
+        className="mb-4"
+      />
+      <div className="flex flex-wrap justify-center gap-4 md:gap-8">
+        {targets.map(({ emoji, number }) => (
+          <button
+            key={number}
+            onClick={() => handleClick(number)}
+            className="flex flex-col items-center justify-center w-28 h-28 md:w-36 md:h-36 bg-white rounded-2xl shadow-lg transform hover:scale-110 transition-transform duration-200 border-4 border-sky-300"
+          >
+            <span className="text-5xl md:text-6xl">{emoji}</span>
+            <span className="text-2xl md:text-3xl font-bold mt-2">{number}</span>
+          </button>
+        ))}
+      </div>
+      <FeedbackIndicator status={feedback} />
     </div>
   );
 };

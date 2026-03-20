@@ -14,6 +14,7 @@ import { SquareIcon } from '../../icons/SquareIcon';
 import { TriangleIcon } from '../../icons/TriangleIcon';
 import { HeartIcon } from '../../icons/HeartIcon';
 import { logger } from '../../../utils/logger';
+import SpeechText from '../../SpeechText';
 
 // --- Props & Types ---
 interface PreschoolGameLevelProps {
@@ -112,27 +113,26 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
             if (wrong !== correctNumber) wrongOptions.add(wrong);
         }
         newChallenge = {
-            prompt: `Có mấy ${itemEmoji} ở đây?`,
-            correctAnswer: { id: correctNumber, value: correctNumber, item: itemEmoji },
-            options: shuffleArray([
-                { id: correctNumber, value: correctNumber, item: itemEmoji },
-                ...Array.from(wrongOptions).map(n => ({ id: n, value: n, item: itemEmoji }))
-            ])
+          prompt: `Có mấy ${itemEmoji} ở đây?`,
+          correctAnswer: { id: correctNumber, value: correctNumber, item: itemEmoji },
+          options: shuffleArray([
+            { id: correctNumber, value: correctNumber, item: itemEmoji },
+            ...Array.from(wrongOptions).map(n => ({ id: n, value: n, item: itemEmoji }))
+          ])
         };
-    } else {
+      } else {
         const shuffledData = shuffleArray(data);
         const selectedItems = shuffledData.slice(0, OPTION_COUNT);
         const correctAnswer = selectedItems[0];
-        
         newChallenge = {
-            prompt: `tìm ${correctAnswer.name}`,
-            correctAnswer: correctAnswer,
-            options: shuffleArray(selectedItems)
+          prompt: `Tìm ${(correctAnswer && typeof correctAnswer === 'object' && 'name' in correctAnswer) ? correctAnswer.name : ''}`,
+          correctAnswer: correctAnswer,
+          options: shuffleArray(selectedItems)
         };
-    }
+      }
     
     setChallenge(newChallenge);
-    speakText(newChallenge.prompt, 'vi');
+   // speakText(newChallenge.prompt, 'vi');
 
   }, [data, level.type, gameState]);
 
@@ -239,13 +239,18 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
         <ReviewMistakesScreen
           incorrectAttempts={incorrectAttempts}
           onBack={() => setIsReviewing(false)}
-          renderAttempt={(attempt, index) => (
-            <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
-              <p className="font-bold text-xl">{attempt.prompt}</p>
-              <p className="text-lg text-red-700">Bé đã chọn: {attempt.selectedAnswer.name}</p>
-              <p className="text-lg text-green-700">Đáp án đúng: {attempt.correctAnswer.name}</p>
-            </div>
-          )}
+          renderAttempt={(attempt: any, index: number) => {
+            const prompt = attempt && typeof attempt.prompt === 'string' ? attempt.prompt : '';
+            const selectedName = attempt && attempt.selectedAnswer && typeof attempt.selectedAnswer === 'object' && 'name' in attempt.selectedAnswer ? attempt.selectedAnswer.name : '';
+            const correctName = attempt && attempt.correctAnswer && typeof attempt.correctAnswer === 'object' && 'name' in attempt.correctAnswer ? attempt.correctAnswer.name : '';
+            return (
+              <div key={index} className="p-3 bg-red-100 rounded-lg text-left">
+                <p className="font-bold text-xl">{prompt}</p>
+                <p className="text-lg text-red-700">Bé đã chọn: {selectedName}</p>
+                <p className="text-lg text-green-700">Đáp án đúng: {correctName}</p>
+              </div>
+            );
+          }}
         />
       );
     }
@@ -267,9 +272,11 @@ const PreschoolGameLevel: React.FC<PreschoolGameLevelProps> = ({ level, onCorrec
 
   return (
     <div className="w-full flex flex-col items-center justify-center relative">
-        <h3 className="text-3xl md:text-4xl font-bold mb-6 p-4 bg-yellow-200 border-4 border-yellow-400 rounded-xl shadow-md text-center">
-            {challenge.prompt}
-        </h3>
+        <SpeechText
+          text={challenge.prompt}
+          lang="vi"
+          className="mb-6"
+        />
         
         {renderChallengeContent()}
 

@@ -6,6 +6,7 @@ import { logger } from '../../utils/logger';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import GameEndScreen from '../GameEndScreen';
 import ReviewMistakesScreen from '../ReviewMistakesScreen';
+import SpeechText from '../SpeechText';
 
 interface Problem {
   a: number;
@@ -157,6 +158,11 @@ const MathLevel: React.FC<MathLevelProps> = ({ difficulty, onCorrect, onStatusUp
 
   return (
     <div className="w-full flex flex-col items-center justify-center relative">
+      <SpeechText
+        text={`Bé hãy tính: ${problem.a} ${problem.op} ${problem.b} bằng bao nhiêu?`}
+        lang="vi"
+        className="mb-4"
+      />
       <div className="text-6xl md:text-8xl font-bold mb-8 p-6 bg-white border-4 border-blue-300 rounded-2xl shadow-md">
         <span>{problem.a}</span>
         <span className="mx-4 text-blue-500">{problem.op}</span>

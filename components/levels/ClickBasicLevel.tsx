@@ -3,6 +3,7 @@ import { playCorrectSound } from '../../utils/sounds';
 import { CLICK_EMOJIS } from '../../constants';
 import { Difficulty } from '../../types';
 import GameEndScreen from '../GameEndScreen';
+import SpeechText from '../SpeechText';
 
 interface ClickBasicLevelProps {
   difficulty: Difficulty;
@@ -92,16 +93,21 @@ const ClickBasicLevel: React.FC<ClickBasicLevelProps> = ({ difficulty, onCorrect
   }
 
   return (
-    <div className="w-full min-h-[400px] relative">
-        <button
-            key={key}
-            onClick={handleClick}
-            className="absolute text-7xl md:text-8xl transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-in-out hover:scale-110 animate-pulse"
-            style={{ top: position.top, left: position.left }}
-            aria-label="Click me"
-        >
-            {emoji}
-        </button>
+    <div className="w-full min-h-[400px] relative flex flex-col items-center justify-center">
+      <SpeechText
+        text="Hãy click vào mục tiêu thật nhanh nhé!"
+        lang="vi"
+        className="mb-4"
+      />
+      <button
+        key={key}
+        onClick={handleClick}
+        className="absolute text-7xl md:text-8xl transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-in-out hover:scale-110 animate-pulse"
+        style={{ top: position.top, left: position.left }}
+        aria-label="Click me"
+      >
+        {emoji}
+      </button>
     </div>
   );
 };
