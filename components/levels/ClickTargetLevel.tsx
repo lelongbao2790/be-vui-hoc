@@ -43,6 +43,7 @@ const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEn
     return [...array].sort(() => Math.random() - 0.5);
   };
 
+  // Reserve 100px at the top for SpeechText
   const generateNewChallenge = useCallback(() => {
     const MAX_TARGETS = 5;
     const shuffledAnimals = shuffleArray(TARGET_EMOJIS);
@@ -52,9 +53,17 @@ const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEn
     }
     const numbers = Array.from(uniqueNumbers);
 
+    // For each target, generate a random position avoiding the top 120px
+    const minTopPx = 120;
+    const maxTopPx = 400;
+    const minLeftPct = 5;
+    const maxLeftPct = 85;
     const newTargets = numbers.map((num, index) => ({
       emoji: shuffledAnimals[index],
       number: num,
+      // Add random position for each target
+      top: `${Math.floor(Math.random() * (maxTopPx - minTopPx)) + minTopPx}px`,
+      left: `${Math.floor(Math.random() * (maxLeftPct - minLeftPct)) + minLeftPct}%`,
     }));
 
     setTargets(newTargets);
@@ -114,17 +123,23 @@ const ClickTargetLevel: React.FC<ClickTargetLevelProps> = ({ onCorrect, onGameEn
 
   return (
     <div className="w-full flex flex-col items-center justify-center relative">
-      <SpeechText
-        text={`Click vào con vật có số ${correctNumber}`}
-        lang="vi"
-        className="mb-4"
-      />
-      <div className="flex flex-wrap justify-center gap-4 md:gap-8">
-        {targets.map(({ emoji, number }) => (
+      {/* Reserve space for SpeechText at the top */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 w-full max-w-md px-4 pointer-events-none" style={{ height: 100 }}>
+        <SpeechText
+          text={`Click vào con vật có số ${correctNumber}`}
+          lang="vi"
+          className="mb-2 pointer-events-auto"
+        />
+      </div>
+      {/* Spacer to push game area below SpeechText */}
+      <div style={{ height: 100 }} />
+      <div className="w-full h-full flex-1 flex items-center justify-center">
+        {targets.map(({ emoji, number, top, left }) => (
           <button
             key={number}
             onClick={() => handleClick(number)}
-            className="flex flex-col items-center justify-center w-28 h-28 md:w-36 md:h-36 bg-white rounded-2xl shadow-lg transform hover:scale-110 transition-transform duration-200 border-4 border-sky-300"
+            className="absolute flex flex-col items-center justify-center w-28 h-28 md:w-36 md:h-36 bg-white rounded-2xl shadow-lg transform hover:scale-110 transition-transform duration-200 border-4 border-sky-300"
+            style={{ top, left }}
           >
             <span className="text-5xl md:text-6xl">{emoji}</span>
             <span className="text-2xl md:text-3xl font-bold mt-2">{number}</span>
