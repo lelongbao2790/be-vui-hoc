@@ -2,6 +2,7 @@ import React from 'react';
 import { TeddyBearIcon } from './icons/TeddyBearIcon';
 import { AppleIcon } from './icons/AppleIcon';
 import { SELECTORS, testIdFor } from '../utils/testIds';
+import SpeechText from './SpeechText';
 
 type AgeGroup = 'preschool' | 'grade1';
 
@@ -12,8 +13,12 @@ interface AgeSelectorProps {
 const AgeSelector: React.FC<AgeSelectorProps> = ({ onSelectAgeGroup }) => {
   return (
     <div id={SELECTORS.AGE.ROOT} data-testid={testIdFor('age-selector','root')} className="text-center">
-      <h2 className="text-4xl font-bold mb-2 text-slate-700">Bé đang học lớp mấy?</h2>
-      <p className="text-lg mb-8 text-slate-500">Hãy chọn lứa tuổi của mình nhé!</p>
+      {/* Question with TTS */}
+      <SpeechText
+        text="Bé đang học lớp mấy? Hãy chọn lứa tuổi của mình nhé!"
+        lang="vi"
+        className="mb-6"
+      />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <button
           id={SELECTORS.AGE.BUTTON('preschool')}

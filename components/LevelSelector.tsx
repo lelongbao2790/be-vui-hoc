@@ -22,6 +22,7 @@ import { BlocksIcon } from './icons/BlocksIcon';
 import { ShapesIcon } from './icons/ShapesIcon';
 import { NumbersIcon } from './icons/NumbersIcon';
 import { SELECTORS, testIdFor } from '../utils/testIds';
+import SpeechText from './SpeechText';
 
 interface LevelSelectorProps {
   subject: Subject;
@@ -62,8 +63,12 @@ const LevelSelector: React.FC<LevelSelectorProps> = ({ subject, onSelectLevel })
   
   return (
     <div id={SELECTORS.LEVEL.ROOT} data-testid={testIdFor('level-selector','root')} className="text-center">
-      <h2 className="text-3xl font-bold mb-2 text-slate-700">Chọn một trò chơi!</h2>
-      <p className="text-lg mb-8 text-slate-500">Hãy cùng thử sức nào bé ơi!</p>
+      {/* Question with TTS */}
+      <SpeechText
+        text="Chọn một trò chơi! Hãy cùng thử sức nào bé ơi!"
+        lang="vi"
+        className="mb-6"
+      />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {subjectLevels.map((level) => {
           const colorKey = Object.keys(levelColors).find(key => level.type.startsWith(key));

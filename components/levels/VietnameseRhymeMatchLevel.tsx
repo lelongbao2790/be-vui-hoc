@@ -3,6 +3,7 @@ import { getVietnameseRhymes } from '../../utils/dataLoader';
 import type { VietnameseRhymePair, Difficulty } from '../../types';
 import { playCorrectSound, playEncouragementSound } from '../../utils/sounds';
 import FeedbackIndicator from '../FeedbackIndicator';
+import SpeechText from '../SpeechText';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import GameEndScreen from '../GameEndScreen';
 import ReviewMistakesScreen from '../ReviewMistakesScreen';
@@ -148,9 +149,12 @@ const VietnameseRhymeMatchLevel: React.FC<VietnameseRhymeMatchLevelProps> = ({ d
 
   return (
     <div className="w-full flex flex-col items-center justify-center relative">
-        <h3 className="text-3xl md:text-4xl font-bold mb-4 text-center">
-            Từ nào có vần giống với từ...
-        </h3>
+        {/* Question prompt with TTS */}
+        <SpeechText
+          text="Từ nào có vần giống với từ..."
+          lang="vi"
+          className="mb-4 text-center"
+        />
         <div className="text-6xl font-bold mb-8 p-4 bg-yellow-200 border-4 border-yellow-400 rounded-xl shadow-md">
             {currentPair.word}
         </div>

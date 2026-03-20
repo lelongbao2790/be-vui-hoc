@@ -3,6 +3,7 @@ import { getVietnameseScrambleSentences } from '../../utils/dataLoader';
 import { Difficulty, type ScrambleSentence } from '../../types';
 import { playCorrectSound, playEncouragementSound } from '../../utils/sounds';
 import FeedbackIndicator from '../FeedbackIndicator';
+import SpeechText from '../SpeechText';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import GameEndScreen from '../GameEndScreen';
 import ReviewMistakesScreen from '../ReviewMistakesScreen';
@@ -181,7 +182,12 @@ const VietnameseScrambleLevel: React.FC<VietnameseScrambleLevelProps> = ({ diffi
 
   return (
     <div className="w-full flex flex-col items-center justify-center relative text-center">
-        <h3 className="text-2xl md:text-3xl font-bold mb-4">Hãy sắp xếp các từ sau thành câu đúng:</h3>
+                {/* Question instruction with TTS */}
+                <SpeechText
+                    text="Hãy sắp xếp các từ sau thành câu đúng."
+                    lang="vi"
+                    className="mb-4"
+                />
         
         <div className="min-h-[80px] w-full max-w-2xl bg-white p-4 rounded-xl border-4 border-dashed border-sky-300 mb-6 flex flex-wrap justify-center gap-4 items-center">
             {playerAnswer.map((word, index) => (
