@@ -139,7 +139,7 @@ export const SpeechText: React.FC<SpeechTextProps> = ({
       const utter = new window.SpeechSynthesisUtterance(chunk);
       utter.voice = voice;
       utter.lang = langCode;
-      utter.rate = 0.85; // Slow for kids
+      utter.rate = 0.6; // Slow for kids
       utter.pitch = getPitch(chunk);
       utter.volume = 1.0;
 
